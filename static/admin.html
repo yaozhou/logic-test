@@ -1,0 +1,935 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Logic Test Admin</title>  
+<script type="text/javascript" src="js/jquery.js"></script>	
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type='text/css'>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+    box-sizing: border-box;
+    margin-top:0;
+}
+
+table, th, td {
+    border: 1px solid #777;
+    border-collapse: collapse;
+}
+
+.setting {
+  color:#666;
+}
+
+  .setting label {
+    display:block;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+
+  .puzzle_ratio {
+    padding : 10px;
+  }
+
+  .setting input {
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    font-size: 14px;
+    vertical-align: middle;
+    line-height: 20px;
+    border-radius: 3px;
+    background-position: right 8px center;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,0.075);
+    width: 400px;
+  }
+
+  #conf_desc {
+      height: 170px;
+  }
+
+  textarea {
+    display:block;
+    margin: 15px 0;
+    width: 400px;    
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    font-size: 14px;
+    vertical-align: middle;
+    line-height: 20px;
+    border-radius: 3px;
+    background-position: right 8px center;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,0.075);
+  }
+
+  .dialog textarea {
+
+  }
+
+   input:focus {
+    background-color: #fff;
+    border-color: #51a7e8;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.075),0 0 5px rgba(81,167,232,0.5);
+  }
+
+   textarea:focus {
+    background-color: #fff;
+    border-color: #51a7e8;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.075),0 0 5px rgba(81,167,232,0.5);
+  }
+
+  .btn {
+    padding:6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid #d5d5d5;
+    border-radius: 3px;
+
+    display: block;
+    width:400px;
+    text-align: center;
+    margin-top: 20px ;
+    margin-right:20px;
+
+    text-shadow:0 -1px 0 rgba(0,0,0,0.15);
+    color: #fff;
+    background-image: linear-gradient(#8add6d, #60b044) ;
+    border-color: #5ca941;
+  }
+
+  .btn:hover {
+    background-color: #569e3d;
+    background-image: linear-gradient(#79d858, #569e3d) ;
+    border-color: #4a993e;
+  }
+
+  .password h3, .conf h3, .puzzle h3, .stat h3{
+    margin: 0px 0px -1px;
+    padding: 9px 10px 10px;
+    font-size: 14px;
+    line-height: 17px;
+    background-color: #f5f5f5;
+    border: 1px solid #d8d8d8;
+    border-radius: 3px 3px 0 0 ;
+    font-weight: 600;
+    margin-bottom: -2px;
+  }
+
+  nav h3 {
+      color: #555;
+      background-color: #f7f7f7 ;
+      padding : 8px 10px ;
+      margin: 0;
+      font-size: 13px;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+      display: block ;
+      line-height: 20px;
+  }
+
+  .password .setting, .conf .setting, .puzzle .setting, .stat .setting{
+      padding:10px;
+      color:#666;
+      background: #fff;
+      border: 1px solid #d8d8d8;
+      border-bottom-right-radius: 3px;
+      border-bottom-left-radius: 3px;
+      margin: 0px;
+  }
+
+  .conf  {
+    display:block;
+    margin-left:2% ;
+
+    float:left;
+    width: 72%;
+      
+}
+
+ .conf, .puzzle , .password, .stat{
+      display: none;
+      float: left;
+      margin-left: 2%;
+      width: 71%;
+      margin-top: 0;
+  }
+
+  .stat em {
+    color : #6699cc;
+
+  }
+
+  .dialog {
+    display:block;
+  }
+
+  .puzzle_modify {
+    display:none;
+    position: fixed;    
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+    width:100%;
+    height:100%;    
+  }
+
+  .dialog {
+      border: 1px solid #ddd;
+      padding: 20px;
+      background-color: #eee;
+      width:480px;
+      margin:20px auto 20px auto ;
+      border-radius: 5px;
+  }
+
+  .puzzle .setting div{
+    border-bottom: 1px solid #ddd;
+    padding: 20px ;
+  }
+
+  .btn_half_size {
+      width:50%;
+      display:inline;
+      margin-right: 25px;
+  }
+
+  .btn_third_size {
+      width:33%;
+      display:inline;
+  }
+
+  .main {
+      width: 980px;
+      margin-right: auto;
+      margin-left: auto;
+      margin-top:0;
+     
+      
+  }
+
+  .nav {
+      width: 25%;
+      float: left;
+      background: #fff;
+      border: 1px solid #d8d8d8;
+      border-radius: 5px;
+      margin-bottom: 15px;
+  }
+
+  .item {
+    display: block;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      color: #4078c0;
+        text-shadow: 0 1px 0 #fff;
+  }
+
+  .item.selected {
+      font-weight: bold;
+      color:#222;
+      cursor:default;
+      background-color: #fff;
+  }
+
+  .item:last-child{
+    border-bottom: none;
+  }
+
+  .banner {
+    background-color: #f5f5f5;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    vertical-align: middle;
+    line-height: 18px
+    border : 1px solid #e5e5e5;
+    margin-bottom: 20px;
+    text-align: center;
+     border: 1px solid #ddd;
+     border-bottom-left-radius: 5px;
+     border-bottom-right-radius: 5px;
+  }
+
+  .item.selected::before {
+    
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    content: "";
+    background-color: #d26911;
+  }
+
+  .right_answer {
+      color:black;
+      font-weight: bold
+
+  }
+
+  .btn-sm {
+    padding: 3px 10px;
+    font-size: 12px;
+    line-height: 20px;
+    margin: 5px;
+  }
+
+</style>
+</head>
+
+
+<body>
+
+<div class='main'>
+  <div class='banner'>智力测验后台管理系统</div>
+
+    <div class='nav'>
+        <nav>
+              <h3 >设置</h3>
+              <a id='conf' href='/admin.html?sub=conf' class='item'>模板设置</a>
+              <a id='puzzle' href='/admin.html?sub=puzzle' class='item'>题目设置</a>
+              <a id='password' href='/admin.html?sub=password' class='item'>修改密码</a>
+              <a id='stat' href='/admin.html?sub=stat' class='item'>统计</a>
+              <a id='logout' href='/admin_login.html' class='item'>退出登陆</a>
+        </nav>
+    </div>
+
+      <div class='conf'>
+      <h3>模板设置</h3>
+     <div class='setting'>
+          
+            <div class='form'>
+            <label>标题</label>
+            <input type='text' id='conf_title'>
+            <label>显示人数</label>
+            <input type='text' id='conf_num'>
+            <label>商品名称(会显示在微信支付凭证里)</label>
+            <input type='text' id='conf_item_name'>
+            <label>商品价格(以分为单位,为0表示不收费)</label>
+            <input type='text' id='conf_item_price'>
+            <label>封面描述</label>
+            <textarea id='conf_desc'></textarea>
+            <div class="comment">
+            <label>题目数</label>
+            <input type='text' id='conf_question_num'>
+            <label>测试时间(秒)</label>
+            <input type='text' id='conf_time'>
+            <label>0(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_0'></textarea>
+             <label>10(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_1'></textarea>
+            <label>20(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_2'></textarea>
+            <label>30(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_3'></textarea>
+            <label>40(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_4'></textarea>
+            <label>50(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_5'></textarea>
+            <label>60(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_6'></textarea>
+            <label>70(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_7'></textarea>
+            <label>80(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>
+            <textarea id='score_8'></textarea>
+            <label>90(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>            
+            <textarea id='score_9'></textarea>
+            <label>100(请分成两行，用回车分隔，第一行是简短描述，第二行是详细描述)</label>            
+            <textarea id='score_10'></textarea>            
+            </div>
+
+            <button type='submit' class='btn' id='update_conf' style="margin-bottom:15px">保存</button>
+
+
+            <img src='/img/cover.jpg' style='width:200px;height:200px'>
+             
+             <form id        =  "uploadForm"
+               enctype   =  "multipart/form-data"
+               action    =  "/api/admin/cover_upload"
+               method    =  "post"
+             >
+                <input type="file" name="userPhoto" multiple />
+                <input type="submit" class='btn' value="上传图片" name="submit">
+            </form>
+          
+          </div>
+
+
+      </div>
+      </div>
+
+       <div class='password'>
+      <h3>密码设置</h3>
+     <div class='setting'>          
+            <div class='form'>
+            <label>原密码</label>
+            <input type='password' id='old_password'>
+            <label>新密码</label>
+            <input type='password' id='new_password'>
+            <label>确认密码</label>
+            <input type='password' id='repeat_password'>
+              <button type='submit' class='btn' id='modify_password' style="margin-bottom:15px">保存</button>          
+          </div>
+      </div>
+      </div>
+
+      <div class="stat">
+          <h3>统计</h3>
+          <div class='setting'> 
+              <div class='today'>
+                  <div > 今天封面页面访问次数:<em class='stat_cover'></em></div>
+                  <div> 今天测试页面访问次数:<em class='stat_test'></em></div>
+                  <div> 今天结果页面访问次数:<em class='stat_result'></em></div>
+                  <div> 今天评论页面访问次数:<em class="stat_comment"></em></div>
+                  <div>今天排行页面访问次数:<em class="stat_ranking"></em></div>
+                  <div>今天新增留言数量:<em class="stat_msg_num"></em></div>
+              </div>
+
+              <div id="chart" class="chart">
+              </div>
+          </div>
+
+          <h3><a href="/main.html?stage=ranking#today" style="color:blue"> 排行榜</a></h3>
+
+      </div>
+
+
+      <div class='puzzle' >
+      
+      <button type='submit' class='btn-sm' style='float:right'>增加</button>
+      <h3 style=''>全部题目</h3>
+      
+      <div class='setting'>
+
+          <div class='puzzle_ratio'>
+          <table class='puzzle_table' style="width:100%">
+            <tr>
+              <th>序号</th>
+              <th>测试次数</th> 
+              <th>答对次数</th>
+              <th>正确率</th>
+              <th>是否启用</th>
+            </tr>
+           
+          </table>
+
+        </div>
+      </div>
+      
+      </div>
+
+      </div>
+
+
+   <div class='puzzle_modify'>
+        <div class='dialog'>
+            <div style='border-bottom: 1px solid #ccc'>
+            <textarea id="puzzle_q"></textarea>
+            </div>
+
+
+            <div sytle='margin:20px'>
+            <div >
+            <input type='radio' name='answer' id='radio_a'>
+             <textarea id="puzzle_a" style='display:inline'></textarea>
+             </div>
+             <div>
+             <input type='radio' name='answer' id='radio_b'>
+             <textarea id="puzzle_b" style='display:inline'></textarea>
+             </div>
+             <div>
+             <input type='radio' name='answer' id='radio_c'>
+             <textarea id="puzzle_c" style='display:inline'></textarea>
+             </div>
+             <div>
+             <input type='radio' name='answer' id='radio_d'>
+             <textarea id="puzzle_d" style='display:inline'></textarea>             
+             </div>
+
+
+
+             </div>
+             <input type='checkbox' id='puzzle_enable'>是否启用
+             
+             <div style='border-top: 1px solid #ccc'>
+             <button id="puzzle_save" type='submit' class='btn' style="width:40%; display:inline">确定</button>
+             <button id="puzzle_cancel" type='submit' class='btn' style="width:40%; display:inline">取消</button>
+             </div>
+
+        </div>
+   </div>
+
+<script type="text/javascript">
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
+    var g_puzzle ;
+
+    function show_puzzle_diag(p) {
+
+          if (p != undefined) {
+                $("#puzzle_q").val(p.question) ;
+                $("#puzzle_a").val(p.a) ;
+                $("#puzzle_b").val(p.b) ;
+                $("#puzzle_c").val(p.c) ;
+                $("#puzzle_d").val(p.d) ;
+
+                $("#puzzle_"  + p.answer).addClass('right_answer') ;
+                $("#radio_" + p.answer).prop('checked', true) ; 
+                $("#puzzle_enable").prop('checked', p.enable != 0) ;
+          } else {
+                $("#puzzle_q").val("") ;
+                $("#puzzle_a").val("") ;
+                $("#puzzle_b").val("") ;
+                $("#puzzle_c").val("") ;
+                $("#puzzle_d").val("") ;
+                $("#radio_a").prop('checked', false)
+                $("#radio_b").prop('checked', false)
+                $("#radio_c").prop('checked', false)
+                $("#radio_d").prop('checked', false)
+
+                $("#puzzle_enable").prop('checked', true) ;
+          }
+
+           $("#puzzle_save").click(function () {
+                      var j =  {question: $("#puzzle_q").val(), a: $("#puzzle_a").val(), b: $("#puzzle_b").val(), 
+                                                          c:$("#puzzle_c").val(),  d:$("#puzzle_d").val(), answer: ""} ;
+
+                      if ($(".dialog input:checked").length > 0)
+                          j.answer = $(".dialog input:checked").attr('id').substring(6) ;
+                      if (p != undefined) j.id = p.id ; 
+
+                      if (j.question == "" || j.a == "" || j.b == "" || j.c == "" || j.d == "" || j.answer == "") {
+                          alert("信息不完整")
+                          return ;
+                        }
+
+                      j.enable = ($("#puzzle_enable").prop('checked')  ? 1 : 0) ;
+
+                      $.post('/api/admin/puzzle_set', j, function(data) {
+                                var ret = JSON.parse(data) ;
+                                if (ret.code == 0) {
+                                      alert('保存成功') ;
+                                      window.location.href = "/admin.html?sub=puzzle" ;
+                                }
+                              $(".puzzle_modify").hide() ;
+                      }) ;
+                })      
+
+          $(".puzzle_modify").show() ;
+    }
+
+
+    $('#puzzle_cancel').click(function() {
+        $('.puzzle_modify').hide() ;
+    })
+
+    $("#logout").click(function() {
+        $.post('/api/admin/logout', {}, function(data){
+            //alert(data) ;
+        })
+    }) ;
+
+    $("#modify_password").click(function() {
+        if ($("#old_password").val() == "") {
+            alert('需要输入原密码') ; return ;
+        }
+
+        if ($("#new_password").val() != $("#repeat_password").val()) {
+              alert('两次密码不一致') ; return ;
+        }
+
+        if ($("#new_password").val() == "") {
+              alert('密码不能为空') ; return ;
+        }
+
+        $.post('/api/admin/password_change', {old_password: $("#old_password").val(), new_password: $("#new_password").val()}, function(data) {
+              var ret = JSON.parse(data) ;
+              if (ret.code == 0) {
+                    alert('修改成功!') ;
+                    $("#old_password").val("") ;
+                    $("#new_password").val("") ;
+                    $("#repeat_password").val("") ;
+              }else {
+                  alert(ret.msg) ;
+              }
+        })
+    })
+
+    $('#update_conf').click(function() {
+        var arg =  {
+                                title:$('#conf_title').val(), 
+                                cover_text:$('#conf_desc').val(), 
+                                user_num:$('#conf_num').val(), 
+                                question_num: $("#conf_question_num").val(), 
+                                test_time:$("#conf_time").val(),
+                                item_name : $("#conf_item_name").val(),
+                                item_price : $("#conf_item_price").val(),
+                          } ;
+        for (var i = 0; i <= 10; ++i) {
+            arg['comment'+i] = $($('.comment textarea')[i]).val() ;
+        };
+
+        $.post('/api/admin/conf_set', arg, function(data){
+              var ret = JSON.parse(data) ;
+              if (ret.code == 0)
+                  alert('保存成功') ;
+              //$('.riqi em').text(ret.user_num) ;              
+        }) ;
+    })
+
+    var subpage = getQueryString('sub') ;
+      $(".conf").hide() ;
+      $(".puzzle").hide() ;
+      $(".password").hide() ;
+      $(".stat").hide() ;
+
+      $("#conf").removeClass("selected") ;
+      $("#puzzle").removeClass("selected") ;
+      $("#password").removeClass("selected") ;
+      $("#stat").removeClass("selected") ;
+
+    switch (subpage) {
+      case 'conf' : 
+          // $(".conf").show() ;
+          // $("#conf").addClass('selected') ;
+          // $(".puzzle").hide() ;
+          // $("#puzzle").removeClass('selected') ;
+          $(".conf").show() ;
+          $("#conf").addClass('selected') ;
+          load_conf() ;
+          
+          break ;
+      case 'puzzle':
+        // $(".conf").hide() ;
+        // $("#conf").removeClass('selected') ;
+        // $(".puzzle").show() ;
+        // $("#puzzle").addClass('selected') ;
+        $(".puzzle").show() ;
+        $("#puzzle").addClass('selected') ;
+         load_puzzle() ;
+        break ;
+
+    case 'password':
+        // $(".conf").hide() ;
+        // $(".puzzle").hide() ;
+        // $(".password").show() ;
+        // $(".stat").hide() ;
+        // $("#password").addClass('selected') ;
+        $(".password").show() ;
+        $("#password").addClass('selected') ;
+        break ;
+
+    case 'stat':
+      $(".stat").show() ;
+      $("#stat").addClass("selected") ;
+      load_stat() ;
+      break ;
+
+    default:
+        //$(".conf").hide() ;
+        //$(".puzzle").hide() ;
+
+      break ;
+    }
+
+    // $.post('/api/login', {username:'admin', password:'admin'}, function(data) {
+    //         var ret = JSON.parse(data) ;                   
+    //         load_info() ;
+    // })
+
+    $(".btn-sm").click(function() {
+          show_puzzle_diag() ;
+    }) ;
+
+    function load_conf() {
+            $.post('/api/conf_get', {}, function(data){
+                var ret = JSON.parse(data) ;
+                
+                $('#conf_title').val(ret.title) ;
+                $('#conf_desc').val(ret.cover_text) ;
+                $('#conf_num').val(ret.user_num) ;                
+
+                $("#conf_question_num").val(ret.question_num) ;
+                $("#conf_time").val(ret.test_time) ;
+                $("#conf_item_name").val(ret.item_name) ;
+                $("#conf_item_price").val(ret.item_price) ;
+
+                for (var i = 0; i<=10; ++i) {
+                      $($(".comment textarea")[i]).text(ret['comment' + i]) ;
+                };
+
+              }) ;
+    }
+
+    function date_2_day(d) {
+        var month = ((d.getMonth() + 1) >= 10 ?  (d.getMonth() + 1) : "0" + (d.getMonth()+1) );
+        var day = (d.getDate() >= 10 ? (d.getDate()) : ("0" + d.getDate()) ) ;
+
+        return d.getFullYear() + "-" + month + "-" + day;
+    }
+
+    function chart(result) {
+      var x = result.map(function(v){
+          return v.day ;
+      })
+      var cover = result.map(function(v) {
+        return v.cover_num ;
+      })
+      var test = result.map(function(v) {
+        return v.test_num ;
+      })
+      var score = result.map(function(v) {
+          return v.result_num ;
+      })
+      var comment = result.map(function(v) {
+          return v.comment_num ;
+      })
+      var ranking = result.map(function(v) {
+          return v.ranking_num ;
+      })
+      var msg = result.map(function(v) {
+          return v.msg_num ;
+      })
+
+      Highcharts.chart('chart', {
+        title: {
+            text: '最近30天日访问次数及留言数',
+            x: -20 //center
+        },
+        subtitle: {
+            text: '',
+            x: -20
+        },
+        xAxis: {
+            //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            categories : x,
+        },
+        yAxis: {
+            title: {
+                text: '访问次数'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: '次'
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: [{
+            name: '封面页',
+            //data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+            data : cover,
+        }, {
+            name: '测试页',
+            //data: [-0.2, 0.8, 5.7, 11.3, 17.0, 22.0, 24.8, 24.1, 20.1, 14.1, 8.6, 2.5]
+            data : test,
+        }, {
+            name: '分数页',
+            //data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
+            data : score,
+        }, {
+            name: '评论页',
+            //data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+            data : comment,
+        }, {
+            name: '排行页',
+            //data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+            data : ranking,
+        },{
+            name:'留言数',
+            data : msg,
+        }]
+    });
+    }
+
+
+  //var STAT_DAYS = 30 ;
+
+
+    function parse_result(visit, msg) {
+        var result = [] ;
+        var n = new Date() ;
+
+        for (var i = 30-1; i >= 0; i--) {
+            var d = new Date(n.valueOf() - (i * 24 * 60 * 60 * 1000)) ;
+            var stat = {day : date_2_day(d)} ;
+            
+            stat.cover_num = visit.filter( function(v) {
+                return (v.time.split(' ')[0] ==  stat.day) && v.view_type == 'cover' ;                  
+            }).length ;
+
+            stat.test_num = visit.filter( function(v) {
+                return (v.time.split(' ')[0] ==  stat.day) && v.view_type == 'test' ;
+            }) .length ;
+          
+            stat.result_num = visit.filter(function(v) {
+                return (v.time.split(' ')[0] ==  stat.day) && v.view_type == 'result' ;
+            }).length ;
+            
+            stat.comment_num = visit.filter(function(v) {
+              return (v.time.split(' ')[0] ==  stat.day) && v.view_type == "comments" ;
+            }).length ;
+            
+            stat.ranking_num = visit.filter(function(v) {
+                return (v.time.split(' ')[0] ==  stat.day) && v.view_type == "ranking" ;
+            }).length ;
+
+            stat.msg_num = msg.filter(function(v) {
+                return v.create_time.split(' ')[0] == stat.day ;
+            }).length ;
+            
+            result.push(stat) ;
+      };
+
+    return result ;
+}
+
+    function load_stat() {       
+        
+          var n = new Date() ;          
+          var from = new Date(n.valueOf() - ((30-1)  * 24 * 60 * 60 * 1000)) ;
+
+          var from_date = date_2_day(from) ;
+          var to_date = date_2_day(n) ;
+
+          $.post('/api/admin/query_stat', {from : from_date, to : to_date}, function(data) {
+                var visit = JSON.parse(data) ;
+
+                $.post('/api/msg_list', {}, function(msg_data) {
+                    var msg = JSON.parse(msg_data) ;
+                    var result = parse_result(visit, msg) ;
+
+                    chart(result) ;
+                    update_today(result[result.length-1]) ;
+              })             
+          })
+    }
+
+    function update_today(r) {
+            $(".stat .stat_cover").text(r.cover_num) ;             
+            $(".stat .stat_test").text(r.test_num) ;
+             $(".stat .stat_result").text(r.result_num) ;              
+              $(".stat .stat_comment").text(r.comment_num) ;              
+              $(".stat .stat_ranking").text(r.ranking_num) ;
+              $(".stat .stat_msg_num").text(r.msg_num) ;
+        }
+
+        function ratio_to_color(r) {
+            if (r == 'N')
+                return '#000000' ;
+
+            if (r >= 70 && r < 80) 
+              return '#880000' ;
+            else if (r >= 80 && r < 90)
+              return '#cc0000' ;
+            else if (r >=90)
+                return '#ff0000' ;
+            else
+                return '#11c2ee' ;
+        }
+
+    function load_puzzle() {
+              $.post('/api/admin/puzzle_all_get', {}, function(data){
+                  var g_puzzle = JSON.parse(data) ;
+                  $(".puzzle h3").text("全部题目:" + g_puzzle.length) ;
+
+                  g_puzzle.forEach(function(v) {
+                    v.ratio = (v.tester_num == undefined || v.tester_num == 0 ? 'N' : (v.right_num * 100 / v.tester_num).toFixed(0) ) ;
+                    v.enable = (v.enable != 0) ;
+                    //var score ;
+                    //if (v.tester_num == undefined || v.right_num == undefined)
+                        //score = '还没有人做过这道题目' ;
+                    //else
+                        //score = '正确率:<em style="color:#11c2ee">' + (v.right_num * 100 / v.tester_num).toFixed(0) + '%</em> ' + v.right_num + '/' + v.tester_num ;
+
+//                      $('.puzzle .setting').append("<div id='puzzle_" +  v.id + "''><ul>(ID:" + v.id + ' ' + score + ")" + v.question + "<li>" + v.a + "</li><li>" + v.b + "</li><li>" + v.c + "</li><li>" + v.d + "</li></ul><Button type='submit' class='btn btn_third_size btn_save'>修改</Button><Button type='submit' class=' btn btn_third_size btn_del'>删除</Button></div>") ;
+
+                    $('.puzzle_table').append('<tr>' + 
+                                                '<td>' + v.id + '</td>' +
+                                                 '<td>' + v.tester_num + '</td>' +
+                                                 '<td>' + v.right_num + '</td>' + 
+                                                  '<td style="color:'  + ratio_to_color(v.ratio) + '">' + v.ratio + '%</td>' + 
+                                                  '<td>' + (v.enable ? "√" : "x") + '</td>' +
+                                                  '</tr>') ;
+
+                      $('.puzzle .setting').append(
+                                "<div id='puzzle_" +  v.id + "'>" + 
+                                "<ul>" + 
+                                    v.question + 
+                                    "<li>" + v.a + "</li><li>" + v.b + "</li><li>" + v.c + "</li><li>" + v.d + "</li>" + 
+                                    "(ID:<em style='color:#3C3CC4'>" + v.id + '</em> ' + 
+                                      '正确率:<em style="color:' + ratio_to_color(v.ratio) + '">' + v.ratio + '%</em>' + ")" +
+                                    "</ul>" + 
+                                "<Button type='submit' class='btn btn_third_size btn_save'>修改</Button>" + 
+                                 "<Button type='submit' class=' btn btn_third_size btn_del'>删除</Button>"  +                                 
+                                "</div>") ;
+
+                      switch (v.answer) {
+                        case 'a':
+                            $($("#puzzle_" + v.id + " ul").children()[0]).addClass('right_answer') ;
+                            break ;
+                        case 'b':
+                            $($("#puzzle_" + v.id + " ul").children()[1]).addClass('right_answer') ;
+                            break ;
+                        case 'c':
+                            $($("#puzzle_" + v.id + " ul").children()[2]).addClass('right_answer') ;
+                            break ;
+                         case 'd' :
+                              $($("#puzzle_" + v.id + " ul").children()[3]).addClass('right_answer') ;
+                              break ;
+                            }
+
+                      $('#puzzle_' + v.id + ' .btn_save').click(function (v) {
+                            show_puzzle_diag(v) ;
+                      }.bind($('#puzzle_' + v.id), v)) ;
+
+                      $("#puzzle_" + v.id + ' .btn_del').click(function (v) {
+                            $.post('/api/admin/puzzle_del', {id: v.id}, function (data) {
+                                  //alert(data) ;
+                                  window.location.href = "/admin.html?sub=puzzle" ;
+                            }) ;
+                      }.bind($("#puzzle_" + v.id), v)) ;
+                  })                  
+              })
+        
+    }
+   
+   
+
+</script>
+
+</body>
+
+
+
+</html>
+
+
+

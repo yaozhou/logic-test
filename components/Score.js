@@ -1,50 +1,56 @@
 import React, { Component }  from 'react' ;
 import Button from 'react-bootstrap/lib/Button'
 import { connect } from 'react-redux'
-import { get_dynamic_action } from './action'
+import { query } from './state'
 
-class Score extends Component {
+import { useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
+const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
+
+export default class Score extends Component {
+
+    constructor(props) {
+        super(props) ;
+
+        this.state = {
+            score_100 : null,
+            test_time : null,
+            short_comment : null,
+            comment : null
+        }
+    }
 
     componentDidMount() {
-        if (this.props.get_score != null)
-            this.props.get_score(this.props.location.query.test_id) ;
+        query('/api/score_share', {test_id : this.props.location.query.test_id}).then(function(ret) {
+                this.setState({
+                    name : ret.name,
+                    score_100 : ret.score_100,
+                    test_time : ret.test_time,
+                    short_comment : ret.short_comment,
+                    comment : ret.comment,
+                })
+        }.bind(this))
     }
 
 
     render() {
-        const { score_100, test_time, short_comment, comment, ranking, test_from_share } = this.props ;
+        let content = null ;
+        if (this.state.score_100 != null) 
+            var short_comment = `${this.state.name}的分数是${this.state.score_100},用时${this.state.test_time}秒。${this.state.short_comment}`
 
-        return (
-            
-            <div>
-                <h4>{short_comment}</h4>
-                <h5>{comment}</h5>
+            content = (
+                        <div>
+                        <div className='short_comment'>{ short_comment}</div>
+                        <h5>{ this.state.comment}</h5>
 
-                <Button bsStyle="primary" bsSize="large"  onClick={test_from_share}>开始测试</Button>
-                <Button bsStyle="primary" bsSize="large"  onClick={ranking}>排行榜</Button>
-                <Button bsStyle="primary" bsSize="large"  >关注公众号</Button>
-                
-            </div>
-        )
+                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push('/cover')}>开始测试</Button>
+                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push("/ranking")}>排行榜</Button>
+                        <Button bsStyle="primary" bsSize="large" className="score_button">关注公众号</Button>
+                        </div>
+                )
+
+        return content ;
     }   
 }
 
-function state_2_props(state) {
-    return { 
-        score_100 :  state.score.score_100,
-        test_time  : state.score.test_time,
-        short_comment : state.score.short_comment,
-        comment : state.score.comment,
-    } ;
-}
-
-function dispatch_2_props(dispatch) {
-    return { 
-        ranking : () => get_dynamic_action().get_ranking(dispatch),
-        test_from_share : () => get_dynamic_action().test_from_share(dispatch),
-        get_score : get_dynamic_action().get_score(dispatch),
-    }
-}
-
-export default connect(state_2_props, dispatch_2_props)(Score) ;
 

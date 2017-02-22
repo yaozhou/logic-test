@@ -8,8 +8,12 @@
 // 情智测评（logictest）
 // 公众号APPID
 // wx26169a090dc52afc
+// 公众号  logictes
+// zhangzhou123
 
 //key = 524c6a1d1b94c6b5a9cebaacbe81083c
+
+// 跳坑指南  一定要设置支付目录，在公众号内,否则无提示失败
 
 
 
@@ -28,6 +32,7 @@ var exec = require('child_process').exec ;
 var sqlite3 = require('sqlite3').verbose() ;
 var Moment = require('moment') ;
 var xml2js = require('xml2js') ;
+var random_string = require('randomstring') ;
 
 // 微信相关
 var APP_ID = 'wx26169a090dc52afc' ;
@@ -77,7 +82,13 @@ var knex = require('knex')({
     //useNullAsDefault:true
 });
 
- 
+function sql_promise(db, sql) {
+    return new Promise(function(resolve, reject) {
+        db.all(sql, function(err, rows) {
+            err ? reject(err) : resolve(rows) ;
+        })
+    })
+}
 
 var Bookshelf = require('bookshelf')(knex);
 var user = Bookshelf.Model.extend({tableName: 'users'});
@@ -131,7 +142,8 @@ function randArray(ary, len) {
 
 // 生成订单结构
 function build_order(ip, open_id) {   
-  var nonce_str = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+  //var nonce_str = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+  var nonce_str = random_string.generate(16) ;
   var order_id = generate_order_id() ;
 
     var order_tmpl = {
@@ -143,7 +155,7 @@ function build_order(ip, open_id) {
         out_trade_no : order_id,
         total_fee : g_conf.item_price,
         spbill_create_ip : ip,
-        notify_url : "url", // FixMe
+        notify_url : "http://www.logictest.net/order_notify.jsp", // FixMe
         trade_type : "JSAPI",
         openid : open_id,
   } ;
@@ -171,7 +183,8 @@ function generate_order_id() {
 
 // 生成客户端支付用的签名
 function generate_pay_signature(pay_id) {
-    var nonce_str     = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+    //var nonce_str     = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+    var nonce_str = random_string.generate(16) ;
     var time_stamp   = '' + Date.parse(new Date()) ;
 
     var str = "appId=" + APP_ID + "&nonceStr=" + nonce_str + "&package=prepay_id=" + pay_id + 
@@ -184,13 +197,14 @@ function generate_pay_signature(pay_id) {
         nonceStr : nonce_str,
         package : "prepay_id=" + pay_id,
         signType : "MD5",
-        paySign : signature,        
+        paySign : signature,
     }
 }
 
 // 生成客户端的wx config
 function generate_client_wx_config() {
-    var nonce_str     = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+    //var nonce_str     = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) ;
+    var nonce_str = random_string.generate(16) ;
     var timestamp   = '' + Date.parse(new Date()) ;
 
     var str = 'jsapi_ticket=' + APP_TICKET.ticket + '&noncestr=' + nonce_str + '&timestamp=' + timestamp +
@@ -251,7 +265,18 @@ app.get('/*.html', function(req, res, next) {
 app.get('/mp', function(req, resp, next) {  
 
     console.log("redirect") ;
-    resp.redirect('/index.html?stage=code&code='  + req.query.code) ;
+    resp.redirect('/#/cover?code='  + req.query.code) ;
+})
+
+app.post('/order_notify.jsp', function(req, resp) {
+    console.log(req.body) ;
+
+    var ret = { return_code : 'SUCCESS', return_msg : 'OK'} ;
+    var builder = new xml2js.Builder({headless : true, rootName: "xml"}) ;
+    var xml = builder.buildObject(ret) ;
+    console.log(ret) ;
+
+    resp.send(xml)  ;
 })
 
 app.post('/api/login_by_cheat', function(req, resp) {
@@ -362,11 +387,40 @@ app.post('/api/msg_list', function(req, res) {
     })
 })
 
-app.post('/api/score_list', function(req, res) {
-      var d = new Moment() ;
-     var arg = {} ;
+function ranking(db, start, end) {
+  var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
+                    'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +
+                   " order by score desc, test_time asc limit 100" ;
 
-     if (req.body.type == "today") {
+   return  sql_promise(db, sql) ;
+}
+
+app.post('/api/score_list', function(req, res) {
+    var d = new Moment() ;
+    var arg = {} ;
+
+    var week_start = new Moment().startOf('week').add(1, 'days').format('YYYY-MM-DD') ;
+    var week_end = new Moment().startOf('week').add(1, 'days').add(7, 'days').format('YYYY-MM-DD') ;
+
+    var pre_week_start = new Moment().startOf('week').add(1, 'days').add(-7, 'days') ;
+    var pre_week_end = new Moment().startOf('week').add(1, 'days') ;
+
+    var year_start = new Moment().startOf('year').format('YYYY-MM-DD') ;
+    var year_end = new Moment().startOf('year').add(1, 'years').format('YYYY-MM-DD') ;
+
+    Promise.all([
+                            ranking(db, week_start, week_end),
+                            ranking(db, pre_week_start, pre_week_end),
+                            ranking(db, year_start, year_end),
+                        ]).then(function(ret) {
+                              res.send({
+                                    week : ret[0],
+                                    pre_week : ret[1],
+                                    year : ret[2],
+                              }) ;
+                        }) ;
+     
+     /*if (req.body.type == "today") {
         arg = {
             start : new Moment().format('YYYY-MM-DD'),
             end : new Moment().add(1, 'days').format('YYYY-MM-DD'),
@@ -397,7 +451,7 @@ app.post('/api/score_list', function(req, res) {
      console.log(sql) ;
      db.all(sql, function(err, rows) {
           res.send(JSON.stringify(rows)) ;
-     })
+     })*/
 })
 
 app.post('/api/build_order', function(req, resp) {
@@ -406,14 +460,15 @@ app.post('/api/build_order', function(req, resp) {
     }
 
     var ip = req.connection.remoteAddress ;
-    var order = build_order(req.connection.remoteAddress, req.session.wx.openid) ;
+    ip = "127.0.0.1" ;
+    var order = build_order(ip, req.session.wx.openid) ;
 
     var builder = new xml2js.Builder({headless : true, rootName: "xml"}) ;
     var xml = builder.buildObject(order) ;
     console.log(xml) ;
 
     request({url : ORDER_URL, method : 'POST', body : xml}, function(err, res, data) {
-
+          console.log(data) ;
           var parser = new xml2js.Parser() ;
           parser.parseString(data, function (err, result) {
               var r = generate_pay_signature(result.xml.prepay_id) ;
@@ -673,7 +728,7 @@ app.post('/api/admin/logout', function(req, res, next){
 
 app.use(express.static('static')) ;
 
-  var server = app.listen(3001 , function () {
+  var server = app.listen(3000 , function () {
   var host = server.address().address;
   var port = server.address().port;
 

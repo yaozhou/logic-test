@@ -13,6 +13,7 @@ import Puzzle from './components/Puzzle'
 import Ranking from './components/Ranking'
 import Score from './components/Score'
 import Container from './components/Container'
+import Wx from './components/Wx'
 
 import store from './components/store'
 
@@ -22,12 +23,15 @@ let element = document.getElementById('reactEntry');
 ReactDOM.render(( 
         <Provider store={store}>
         <Router history={hashHistory}>
-            <Route path="/" component={Container} >
+
+            <Route path="/" component={Wx} />
+            <Route path="/app" component={Container} >
                 <IndexRoute components={Cover} />
                 <Route path="/puzzle" component={Puzzle} />
                 <Route path="/score" component={Score} />
                 <Route path="/ranking" component={Ranking} />
                 <Route path="/cover" component={Cover} />
+
             </Route>
         </Router>
         </Provider>

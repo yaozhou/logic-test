@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>逻辑测试题后台管理系统</title>  
+<script type="text/javascript" src="js/jquery.js"></script>	
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type='text/css'>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+}
+
+  .auth-form {
+
+    width:340px;
+    margin: 50px auto;
+  }
+
+  .auth-form h1 {
+    margin-bottom: 15px;
+    color:#333;
+    text-align:center;
+    text-shadow:none;
+    background-color: transparent;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+  }
+
+  .auth-form-body {    
+    border-radius: 5px;
+    padding:20px;
+    font-size:14px;
+    border: 1px solid #d8dee2;
+  }
+
+  .auth-form-body label {
+    display:block;    
+    margin-bottom:7px;
+    font-weight: normal;
+  }
+
+  .input-block {
+    display: block;
+    width: 90%;
+    min-height:34px;
+    padding:6px 8px;
+    font-size:14px;
+    line-height:20px;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    border: 1px solid #ddd;
+  }
+
+  .btn {
+    padding:6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid #d5d5d5;
+    border-radius: 3px;
+
+    display: block;
+    width:100%;
+    text-align: center;
+    margin-top: 20px;
+
+    text-shadow:0 -1px 0 rgba(0,0,0,0.15);
+    color: #fff;
+    background-image: linear-gradient(#8add6d, #60b044) ;
+    border-color: #5ca941;
+  }
+
+  .btn:hover {
+    background-color: #569e3d;
+    background-image: linear-gradient(#79d858, #569e3d) ;
+    border-color: #4a993e;
+  }
+
+</style>
+</head>
+
+
+<body>
+    <div class='auth-form'>
+      <h1>逻辑测试题后台管理系统</h1>
+      <div class='auth-form-body'>
+      <label>账号</label>
+      <input id='name' type='text' class='input-block'>
+      <label>密码</label>
+      <input id='password' type='password' class='input-block'>
+      <input id='login' type='submit' value="登陆" class='btn btn-block btn-primary'>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    
+    $("#login").click(function() {
+         $.post('/api/admin/login', {username:$("#name").val(), password:$("#password").val()}, function(data) {
+                var ret = JSON.parse(data) ;                    
+                if (ret.code == 0)
+                    window.location.href=ret.to ;
+        })
+    })
+
+</script>
+
+
+
+</html>
+
+
+

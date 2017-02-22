@@ -32,6 +32,8 @@ function get_dynamic_action() {
     return dynamic_action ;
 }
 
+
+
 function fetch_post(url, param, id) {
     return  function(dispatch) {
         dispatch( { type: id + '_PENDING'} ) ;
@@ -59,4 +61,3 @@ function fetch_post(url, param, id) {
 
 
 
-export { get_dynamic_action } ;

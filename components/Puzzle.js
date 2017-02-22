@@ -4,31 +4,61 @@ import FormGroup from 'react-bootstrap/lib/FormGroup'
 import ControlLabel from 'react-bootstrap/lib/ControlLabel'
 import Carousel from 'react-bootstrap/lib/Carousel'
 import Button from 'react-bootstrap/lib/Button'
-import { get_dynamic_action } from './action'
-import { connect } from 'react-redux'
+import ListGroup from 'react-bootstrap/lib/ListGroup'
+import ListGroupItem from 'react-bootstrap/lib/ListGroupItem'
+import Label from 'react-bootstrap/lib/Label'
 
-class Puzzle extends Component {
+import { store, query } from './state'
+
+import { useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
+const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
+
+export default class Puzzle extends Component {
     constructor(props) {
         super(props) ;
 
         this.state = {
+            test_id : 0,
             index : 0,
-            left_time : this.props.test_time,
-            answer : new Array(this.props.puzzle.length),
+            puzzle : [],
+            test_time : store.cover.test_time,
+            left_time : store.cover.test_time,
+            answer : [],
             interval : null,
         }
     }
 
-    componentDidMount() {
-         var interval = setInterval(function() {
-              var left_time = this.state.left_time - 1 ;
-              if (left_time == 0) {
-                  this.props.report_answer(this.props.test_id, this.state.answer, this.props.test_time - this.state.left_time) ;
-              }
-              clearInterval(this.state.interval) ;
-         }.bind(this), 1000) ;
+    finish_test() {
+        let param = { 
+                test_id : this.state.test_id, 
+                answers : this.state.answer,
+                test_time : this.state.test_time - this.state.left_time } ;
 
-         this.setState({interval : interval}) ;
+        query('/api/test_finish', param).then(function(){
+            History.replace('/score?test_id=' + this.state.test_id) ;
+        }.bind(this)) ;
+    }
+
+    componentDidMount() {
+        query('/api/test_begin', {}).then(function(ret) {
+              this.setState({
+                  test_id : ret.test_id,
+                  puzzle : ret.puzzle,
+                  answer : new Array(ret.puzzle.length),                  
+              })
+
+              var interval = setInterval(function() {
+                    var left_time = this.state.left_time - 1 ;
+                    if (left_time == 0) {
+                        this.finish_test() ;
+                        clearInterval(this.state.interval) ;
+                    }
+                    this.setState({left_time : left_time}) ;
+              }.bind(this), 1000) ;
+
+              this.setState({interval : interval}) ;
+        }.bind(this))         
     }
 
     componentWillUnmount() {
@@ -36,66 +66,74 @@ class Puzzle extends Component {
     }
 
     puzzle_answer(index, o) {
-        this.state.answer[this.state.index] = { id : this.props.puzzle[index].id, answer : o } ;
+        this.state.answer[this.state.index] = { id : this.state.puzzle[index].id, answer : o } ;
 
-        if (this.state.index + 1 == this.props.puzzle.length) { // finish test
-            this.props.report_answer(this.props.test_id, this.state.answer, this.props.test_time - this.state.left_time) ;
+        if (this.state.index + 1 == this.state.puzzle.length) {
+            this.finish_test() ;
         }else {
-            var next = this.state.index + 1 > this.props.puzzle.length ? 0 : this.state.index +  1 ;
+            var next = this.state.index + 1 > this.state.puzzle.length ? 0 : this.state.index +  1 ;
             this.setState({index : next}) ;
         }
     }
 
     render () {
-        const { puzzle, left_time, test_time } = this.props ;
-
-        var ary = puzzle.map(function(v, idx) {
+        var ary = this.state.puzzle.map(function(v, idx) {
             return (
                  <Carousel.Item key={idx}>
                  <form>
                      <FormGroup>
-                        <ControlLabel>{v.question}</ControlLabel>
+                     <h4>{v.question}</h4>
                      </FormGroup>
-                        <FormGroup>                          
+                        <FormGroup >
+                          <ListGroup>
+
+
+                          <ListGroupItem  className="question_item">
                           <Radio  name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'a')} >
                             {v.a}
-                          </Radio>                  
+                          </Radio>              
+                          </ListGroupItem>
+
+                           <ListGroupItem  className="question_item">
                           <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'b')}>
                             {v.b}
-                          </Radio>                  
+                          </Radio>    
+                          </ListGroupItem>
+
+                           <ListGroupItem className="question_item">
                           <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'c')}>
                             {v.c}
                           </Radio>
+                          </ListGroupItem>
+
+                           <ListGroupItem  className="question_item">
                           <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'd')}>
                             {v.d}
                           </Radio>
+                          </ListGroupItem>
+
+                            </ListGroup>
+
                         </FormGroup>
                         </form>
                   </Carousel.Item>
               )
         }.bind(this))
 
-        return (
+       var m = Math.floor(this.state.left_time / 60) ;
+      var s = this.state.left_time % 60 ;
+      if (m < 10) m = '0' + m ;
+      if (s < 10) s = '0' + s ;
+      var time_str = m + ':' + s ;
 
+        return (
             <div>
             <Carousel controls={false} activeIndex={this.state.index} >
                   {ary}
             </Carousel>
+            <h4 className="progress"><Label>{(this.state.index+1) + '/' + this.state.puzzle.length}</Label></h4>
+            <h4 className="time">{time_str}</h4>
             </div>
             )
     }
 }
-
-function state_2_props(state) {
-    return { 
-        puzzle : state.test.puzzles,
-        test_id : state.test.test_id,
-        test_time : state.cover.test_time,
-    } ;
-}
-
-function dispatch_2_props(dispatch) {
-    return { report_answer : get_dynamic_action().report_answer(dispatch) }
-}
-
-export default connect(state_2_props, dispatch_2_props)(Puzzle) ;

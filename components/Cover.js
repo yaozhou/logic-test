@@ -1,36 +1,57 @@
 import React, { Component } from 'react' ;
 import Image from 'react-bootstrap/lib/Image'
 import Button from 'react-bootstrap/lib/Button'
-import { connect } from 'react-redux'
-import { get_dynamic_action } from './action'
+import { store, query } from './state'
+var wx = require ('./jweixin-1.2.0.js')
 
-class Cover extends Component {
+import { useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
+const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
+
+export default class Cover extends Component {
+    constructor(props) {
+        super(props) ;
+        this.state = {
+            cover_text : store.cover.cover_text,
+            item_price : store.cover.item_price,
+        }
+    }
+
+    start_test() {
+        if (this.state.item_price == 0)
+            History.replace("/puzzle") ;
+        else {
+            query('/api/build_order', {}).then(function(ret) {
+                    alert(JSON.stringify(ret)) ;
+                    var detail = ret.detail ;
+
+                    wx.chooseWXPay({
+                        timestamp : detail.timestamp,
+                        nonceStr : detail.nonceStr,
+                        package : detail.package,
+                        signType : detail.signType,
+                        paySign : detail.paySign,
+                        success:  (res) => {
+                            if (res.errMsg = "chooseWXPay:ok") 
+                                History.replace("/puzzle")
+                        }
+                    })
+            })
+        }
+    }
+
     render() {
-        const { loading, title , cover_text, start_test} = this.props ;
+        let content = null ;
+        if (this.state.cover_text != null)  {
+            let ary = this.state.cover_text.split('\n').map((text, idx) => (<div key={idx}>{text}</div>))
 
-        let content = loading != "finished" ? null :
-                ( <div>
-                    <Image src="img/cover.jpg" responsive />
-                    <h4>{cover_text}</h4>
-                    <Button bsStyle="primary" bsSize="large" onClick={start_test} block>开始测试</Button>
-                </div>)
+            content = ( <div>
+                                    <Image src="img/cover.jpg" responsive />
+                                    <h4>{ary}</h4>
+                                    <Button bsStyle="primary" bsSize="large" onClick={this.start_test.bind(this)} block>开始测试</Button>
+                                </div>)
+        }
 
         return (content)
     }
 }
-
-
-function state_2_props(state) {
-    return { 
-            title : state.cover.title, 
-            cover_text : state.cover.cover_text,
-            loading : state.cover.loading,
-        } ;
-}
-
-function dispatch_2_props (dispatch) {
-   return { start_test : () => get_dynamic_action().start_test(dispatch) }
-}
-
-
-export default connect(state_2_props, dispatch_2_props)(Cover) ;

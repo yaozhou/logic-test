@@ -74,6 +74,10 @@ const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
             History.replace("/puzzle") ;
             return ret ;
 
+    case "RANKING_WEEK_SUCCESS":
+            ret.ranking.week_pre = action.result ;
+            return 
+
     case "PUSH_ANSWER_PENDING":
 
             return ret ;
@@ -86,8 +90,7 @@ const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
             
             return ret ;
 
-    case "RANKING_GET_SUCCESS" :
-
+    case "RANKING_GET_SUCCESS" :    
             //History.replace('/ranking') ;
             return ret ;
 
