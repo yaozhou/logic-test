@@ -45,7 +45,7 @@ export default class Score extends Component {
 
                         <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push('/cover')}>开始测试</Button>
                         <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push("/ranking")}>排行榜</Button>
-                        <Button bsStyle="primary" bsSize="large" className="score_button">关注公众号</Button>
+                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push('/prize')}>关注奖金池 </Button>
                         </div>
                 )
 

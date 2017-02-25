@@ -22,6 +22,7 @@ var URL = "http://pay.163.gg/api/TradeOrder_createOrder" ;
 var express = require('express') ;
 var app = express() ;
 var bodyParser = require('body-parser') ;
+require('body-parser-xml')(bodyParser);
 var express_session = require('express-session') ;
 var md5 = require('MD5') ;
 var sha1 = require('sha1') ;
@@ -33,6 +34,11 @@ var sqlite3 = require('sqlite3').verbose() ;
 var Moment = require('moment') ;
 var xml2js = require('xml2js') ;
 var random_string = require('randomstring') ;
+var later = require('later') ;
+
+
+
+
 
 // 微信相关
 var APP_ID = 'wx26169a090dc52afc' ;
@@ -49,7 +55,7 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
 
-    next();
+    next() ;
 }
 
 
@@ -57,6 +63,7 @@ var allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 app.use(bodyParser.json('1mb')) ;
 app.use(bodyParser.urlencoded({extended: true})) ;
+app.use(bodyParser.xml());
 app.use(express_session({ secret: 'keyboard cat', resave:false, saveUninitialized: false }))
 
 // 上传中间件
@@ -79,7 +86,7 @@ var knex = require('knex')({
     client: 'sqlite3',
     connection: {filename : "res/we.db"},
     // fixme, 默认值未支持
-    //useNullAsDefault:true
+    useNullAsDefault:true
 });
 
 function sql_promise(db, sql) {
@@ -92,10 +99,11 @@ function sql_promise(db, sql) {
 
 var Bookshelf = require('bookshelf')(knex);
 var user = Bookshelf.Model.extend({tableName: 'users'});
-var order = Bookshelf.Model.extend({
-  tableName:'t_order', 
-  user : function() { return this.belongsTo(user, 'user_id')}
+var money = Bookshelf.Model.extend({
+  tableName:'money', 
+//  user : function() { return this.belongsTo(user, 'open_id')}
 })
+
 var puzzle = Bookshelf.Model.extend({tableName:"puzzle"}) ;
 var test = Bookshelf.Model.extend({
   tableName:'test',
@@ -115,9 +123,126 @@ var msg = Bookshelf.Model.extend({
 var statistics = Bookshelf.Model.extend({
   tableName : "statistics"
 })
+var prize = Bookshelf.Model.extend({
+  tableName : "prize"
+})
+
+var MONTH_PRIZE_RATIO = [0.3, 0.1, 0.05, 0.03, 0.02, 0.01] ;
+var YEAR_PRIZE_RATIO = [0.3, 0.1, 0.05, 0.03, 0.02, 0.01] ;
+
+function ranking_prize(db, start, end, ratio) {
+    return Promise.all([
+          prize_list(db, start, end),
+          ranking(db, start, end),
+      ])
+    .then(function(ret) {
+        var money = ret[0][0].money ;
+        var ranking = ret[1] ;
+    //    console.log(ranking) ;
+
+        ranking = ranking.slice(0, ratio.length) ;
+        ranking.forEach(function(v, idx) {
+            if (idx < ranking.length)
+                ranking[idx].money = Math.floor(money * ratio[idx]) ;
+        })
+        return ranking ;
+    })
+}
 
 
+function caculate_pre_month_prize() {
+    var start = new Moment().startOf('month').subtract(1, 'days').startOf('month').format('YYYY-MM-DD') ;
+    var end = new Moment().startOf('month').subtract(1, 'days').format('YYYY-MM-DD') ;
 
+    ranking_prize(db, start, end, MONTH_PRIZE_RATIO).then(function(ranking) {
+              ranking.forEach(function(v, idx) {
+                var p =  {
+                  date : start.substring(0,7),
+                  type : 'month',
+                  test_id : v.id,
+                  ranking : idx,
+                  money : v.money,
+                  mark : "",
+                } ;       
+                new prize().save(p) ;
+          })
+    })
+}
+
+function caculate_pre_year_prize() {
+    var start = new Moment().startOf('year').subtract(1, 'days').startOf('year').format('YYYY-MM-DD') ;
+    var end = new Moment().startOf('year').subtract(1, 'days').format('YYYY-MM-DD') ;
+
+    ranking_prize(db, start, end, YEAR_PRIZE_RATIO).then(function(ranking) {
+          ranking.forEach(function(v, idx) {
+            var p = {
+                date :  start.substring(0, 4),
+                type : 'year',
+                test_id : v.id,
+                ranking : idx,
+                money : v.money,
+                mark : "",
+            }    
+            new prize().save(p) ;
+        })
+    })
+}
+
+// 每个月第一天0点0分0秒
+var month_sche = {
+    schedules: [
+      { day : [1], h : [0], m : [0], s : [0]},
+//      {s : [0]}
+      ]
+  };
+
+// 每年第一个月第一天0点0分0秒
+var year_sche = {
+    schedules: [
+      {M : [1], day : [1], h : [0], m : [0], s : [0]},      
+      ]
+}
+
+later.date.localTime() ;
+//caculate_pre_month_prize() ;
+later.setInterval(caculate_pre_month_prize, month_sche) ;
+later.setInterval(caculate_pre_year_prize, year_sche) ;
+
+
+// var order_ret = { 
+//     appid:  ['wx26169a090dc52afc'],
+//      bank_type: ['CFT'] ,
+//      cash_fee: ['1'] ,
+//      fee_type: ['CNY'],
+//      is_subscribe: ['Y'] ,
+//      mch_id:  ['1433643802'] ,
+//      nonce_str:  ['uUJIfFDngR4WnjaW'] ,
+//      openid:  ['ouBf1vkKoPRHyrCC1MnSE7rpE310'] ,
+//      out_trade_no:  ['201702241729321524'] ,
+//      result_code:  ['SUCCESS'] ,
+//      return_code:  ['SUCCESS'] ,
+//      sign:  ['5D93D938A27B999C8B0273E8754DED39'] ,
+//      time_end:  ['20170224172942'] ,
+//      total_fee:  ['1' ],
+//      trade_type:  ['JSAPI'] ,
+//      transaction_id:  "111132312312" } ;
+
+//     order_ret.cash_fee = parseInt(order_ret.cash_fee) ;
+//     order_ret.total_fee = parseInt(order_ret.total_fee) ;
+
+//     for (var o in order_ret) {
+//         order_ret[o] = order_ret[o][0] ;
+//     }
+//     console.log(order_ret) ;
+
+    // money.forge({transaction_id : order_ret.transaction_id}).fetch().then(function(model) {
+    //   if (model == null) {
+    //         new money().save(order_ret) ;
+    //   }else {
+    //         console.log('already have order of : ' + order_ret.transaction_id) ;
+    //   }
+    // }) ;
+     
 
 // 全局配置
 var g_conf = {} ;
@@ -155,7 +280,7 @@ function build_order(ip, open_id) {
         out_trade_no : order_id,
         total_fee : g_conf.item_price,
         spbill_create_ip : ip,
-        notify_url : "http://www.logictest.net/order_notify.jsp", // FixMe
+        notify_url : "http://www.logictest.net/order_notify", // FixMe
         trade_type : "JSAPI",
         openid : open_id,
   } ;
@@ -268,15 +393,102 @@ app.get('/mp', function(req, resp, next) {
     resp.redirect('/#/cover?code='  + req.query.code) ;
 })
 
-app.post('/order_notify.jsp', function(req, resp) {
-    console.log(req.body) ;
+// { xml: 
+//    { appid: [ 'wx26169a090dc52afc' ],
+//      bank_type: [ 'CFT' ],
+//      cash_fee: [ '1' ],
+//      fee_type: [ 'CNY' ],
+//      is_subscribe: [ 'Y' ],
+//      mch_id: [ '1433643802' ],
+//      nonce_str: [ 'r5eD7AUm0ak8WLG5' ],
+//      openid: [ 'ouBf1vkKoPRHyrCC1MnSE7rpE310' ],
+//      out_trade_no: [ '201702241332304763' ],
+//      result_code: [ 'SUCCESS' ],
+//      return_code: [ 'SUCCESS' ],
+//      sign: [ '5CAB9ED06F73B0FC8FE1B48ECD7AD506' ],
+//      time_end: [ '20170224133237' ],
+//      total_fee: [ '1' ],
+//      trade_type: [ 'JSAPI' ],
+//      transaction_id: [ '4003742001201702241128568311' ] } }
 
-    var ret = { return_code : 'SUCCESS', return_msg : 'OK'} ;
-    var builder = new xml2js.Builder({headless : true, rootName: "xml"}) ;
-    var xml = builder.buildObject(ret) ;
-    console.log(ret) ;
+app.post('/order_notify', function(req, resp) {
+    console.log(req.body) ;    
 
-    resp.send(xml)  ;
+    var order_ret = req.body.xml ;
+
+    // 很奇怪，插件转出来的字段值不是字符串，而是字符串的数组
+    for (var o in order_ret) {
+        order_ret[o] = order_ret[o][0] ;
+    }
+    console.log(order_ret) ;
+    
+    order_ret.cash_fee = parseInt(order_ret.cash_fee) ;
+    order_ret.total_fee = parseInt(order_ret.total_fee) ;
+
+    money.forge({transaction_id : order_ret.transaction_id}).fetch().then(function(model) {
+      if (model == null) {
+            new money().save(order_ret) ;
+      }else {
+            console.log('already have order of : ' + order_ret.transaction_id) ;
+      }
+
+      var ret = { return_code : 'SUCCESS', return_msg : 'OK'} ;
+      var builder = new xml2js.Builder({headless : true, rootName: "xml"}) ;
+      var xml = builder.buildObject(ret) ;
+
+      resp.send(xml)  ;
+  })    
+})
+
+function prize_list(db, start, end) {
+     let sql = 'select SUM(total_fee) as money from money where date("create_time") >= "' + 
+                        start + '" and date(create_time) <=  "' + end  + '"' ;
+    return sql_promise(db, sql) ;
+}
+
+
+function last_prize_list(db, t, type) {
+    var sql = 'select prize.test_id as prize_test_id, prize.date as prize_date , prize.type as prize_type, prize.test_id as prize_test_id, prize.ranking as prize_ranking, prize.money as prize_money, prize.mark as prize_mark, test.id as test_id, test.start_time as test_start_time, test.score as test_score, test.user_id as test_user_id, test.score_100 as test_score_100, test.test_time as test_test_time, users.id as users_id, users.username as users_username, users.password as users_password, users.point as users_point, users.head_img as users_head_img  from  prize left join test on prize.test_id == test.id left join users  on test.user_id == users.id where prize_type == "' + type + '" and prize_date == "' + t + '"' ;
+
+    return sql_promise(db, sql) ;
+}
+
+
+app.post('/api/last_prize', function(req, resp) {
+    var last_month =  new Moment().startOf('month').subtract(1, 'days').startOf('month').format('YYYY-MM') ;
+    var last_year = new Moment().startOf('year').subtract(1, 'days').startOf('year').format('YYYY') ;
+
+    Promise.all([
+          last_prize_list(db, last_month, 'month'),
+          last_prize_list(db, last_year, 'year'),
+      ])
+    .then(function(ret) {
+          console.log(ret) ;
+          resp.send({last_month : ret[0], last_year : ret[1]}) ;
+    })
+
+})
+
+
+app.post('/api/prize_money', function(req, resp) {
+    var cur_month_start = new Moment().startOf('month').format('YYYY-MM-DD') ;
+    var cur_month_end = new Moment().endOf('month').format('YYYY-MM-DD') ;
+
+    var year_start = new Moment().startOf('year').format('YYYY-MM-DD') ;
+    var year_end = Moment().endOf('year').format('YYYY-MM-DD') ;    
+
+    Promise.all([
+        ranking_prize(db, cur_month_start, cur_month_end, MONTH_PRIZE_RATIO),
+        ranking_prize(db, year_start, year_end, YEAR_PRIZE_RATIO)
+        ])
+    .then(function(ret) {        
+        var r = {month_ranking : ret[0], year_ranking : ret[1] } ;
+        console.log(r) ;
+        resp.send(JSON.stringify(r)) ;
+    }).catch(function(err) {
+        console.log(err) ;
+    })
+
 })
 
 app.post('/api/login_by_cheat', function(req, resp) {
@@ -388,9 +600,13 @@ app.post('/api/msg_list', function(req, res) {
 })
 
 function ranking(db, start, end) {
-  var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
-                    'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +
-                   " order by score desc, test_time asc limit 100" ;
+  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, test.score_100 as score_100, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  order by score desc, test_time asc limit 100' ;
+
+  // var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
+  //                   'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +
+  //                  " order by score desc, test_time asc limit 100" ;
+
+   // console.log(sql) ;
 
    return  sql_promise(db, sql) ;
 }

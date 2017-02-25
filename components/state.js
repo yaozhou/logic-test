@@ -1,5 +1,4 @@
-
-
+var $ = require('./jquery')
 
 var store = {
     cover : {        
@@ -9,36 +8,28 @@ var store = {
         test_time : null,
     },
 
-    test :  {
-        loading : "not_start",
-        test_id : null,
-        puzzles : [],
+    user : {
+
     },
-
-    score : {
-        id : null,
-        score : null,
-        score_100 : null,
-        test_time : null,
-        short_comment : null,
-        comment : null,
-    },
-
-    ranking : {
-        week_pre : [],
-        week : [],
-        year : [],
-    }
-
-   
 } ;
 
 function query(url, param) {
+    return new Promise(function(resolve, reject) {
+        $.post(url, param, function(data) {
+            if (typeof data == 'string')
+                data = JSON.parse(data) ;
+            resolve(data) ;
+        })
+    })
+}
+
+// 为啥这样写在android上正常，ios里根本就像没执行过一样?
+function fetch_query(url, param) {
     var data = new FormData();
     data.append( "json", JSON.stringify( param ) );
 
     var option = {
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
         method : 'POST', 
         credentials : 'include', 
         body : JSON.stringify(param),

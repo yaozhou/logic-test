@@ -22,7 +22,7 @@ export default class Cover extends Component {
             History.replace("/puzzle") ;
         else {
             query('/api/build_order', {}).then(function(ret) {
-                    alert(JSON.stringify(ret)) ;
+                    //alert(JSON.stringify(ret)) ;
                     var detail = ret.detail ;
 
                     wx.chooseWXPay({

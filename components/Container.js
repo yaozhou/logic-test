@@ -13,10 +13,12 @@ export default class Container extends Component {
     }
 
     wx_init(user) {
+        store.user = user ;
+
         wx.error( (res) => alert(JSON.stringify(res)) ) ;
 
         var config = {
-            debug : true,
+            debug : false,
             appId : user.config.appId,
             timestamp : user.config.timestamp,
             nonceStr : user.config.nonceStr,
@@ -35,33 +37,40 @@ export default class Container extends Component {
         let debug = this.props.location.query.debug ;
 
         if (code != null) {
-            p = query('/api/login_by_code', {code : code}) ;
+            p = query('http://www.logictest.net/api/login_by_code', {code : code}) ;
         }else if (debug == 'true') {
             p = query('/api/login_by_cheat', {}) ;
         }
-
-        p.then(function(ret) {            
-            if (code != null)
-                this.wx_init(ret) ;
-
-            if (store.cover.title == null)
-                query('http://www.logictest.net/order_notify.jsp', {"di" : "asdfasdf"}).then(function(ret) {
+        
+        function process_conf() {
+            if (store.cover.title == null) {
+                query('/api/conf_get', {}).then(function(ret) {                    
                     store.cover.title = ret.title ;
                     store.cover.cover_text = ret.cover_text ;
                     store.cover.item_price = ret.item_price ;
                     store.cover.test_time = ret.test_time ;
 
                     this.setState({title : ret.title}) ;
-                }.bind(this)) ;
-
-        }.bind(this)) ;
+                }.bind(this))
+                //.catch((err) => alert(err)) ;
+            }            
+        }
+           
+        if (p != null) {
+            if (code != undefined)
+                p.then((ret) => this.wx_init(ret)).then(process_conf.bind(this)) ;
+            else 
+                p.then(process_conf.bind(this)) ;
+        }
+        else
+            process_conf.bind(this)() ;
     }
 
   render() {
     
     return (
                 <div>
-                    <PageHeader >{this.state.title}</PageHeader>
+                    <PageHeader >{this.state.title} </PageHeader>
                     { this.state.title == null ?  null : this.props.children }
                 </div>
     )

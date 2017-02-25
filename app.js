@@ -4,6 +4,8 @@ import { Router, Route, IndexRoute, useRouterHistory, hashHistory, browserHistor
 import { createHashHistory } from 'history';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
+//require ('./components/jquery')
+
 
 const History = useRouterHistory(createHashHistory)();
 // let store = createStore(reducer) ;
@@ -14,6 +16,7 @@ import Ranking from './components/Ranking'
 import Score from './components/Score'
 import Container from './components/Container'
 import Wx from './components/Wx'
+import Prize from './components/Prize'
 
 import store from './components/store'
 
@@ -31,6 +34,7 @@ ReactDOM.render((
                 <Route path="/score" component={Score} />
                 <Route path="/ranking" component={Ranking} />
                 <Route path="/cover" component={Cover} />
+                <Route path="/Prize" component={Prize} />
 
             </Route>
         </Router>
