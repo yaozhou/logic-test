@@ -4,11 +4,8 @@ import { Router, Route, IndexRoute, useRouterHistory, hashHistory, browserHistor
 import { createHashHistory } from 'history';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-//require ('./components/jquery')
-
 
 const History = useRouterHistory(createHashHistory)();
-// let store = createStore(reducer) ;
 
 import Cover from './components/Cover' ;
 import Puzzle from './components/Puzzle'
@@ -17,14 +14,12 @@ import Score from './components/Score'
 import Container from './components/Container'
 import Wx from './components/Wx'
 import Prize from './components/Prize'
+import Login from './components/Login'
+import Admin from './components/Admin'
 
-import store from './components/store'
-
-import { init_state, reducer } from './components/reducer'
 
 let element = document.getElementById('reactEntry');
 ReactDOM.render(( 
-        <Provider store={store}>
         <Router history={hashHistory}>
 
             <Route path="/" component={Wx} />
@@ -34,9 +29,9 @@ ReactDOM.render((
                 <Route path="/score" component={Score} />
                 <Route path="/ranking" component={Ranking} />
                 <Route path="/cover" component={Cover} />
-                <Route path="/Prize" component={Prize} />
-
+                <Route path="/prize" component={Prize} />
+                <Route path="/login" component={Login} />
+                <Route path="/admin" component={Admin} />
             </Route>
         </Router>
-        </Provider>
   ), element) ;

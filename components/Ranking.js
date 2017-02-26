@@ -56,7 +56,6 @@ export default class Ranking extends Component {
         }.bind(this)) ;
 
         return (
-            <div>
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
                             <Tab eventKey={1} title="本周排行榜">
                                     {week_ary}
@@ -68,7 +67,6 @@ export default class Ranking extends Component {
                                     {year_ary}
                             </Tab>
                     </Tabs>
-            </div>
         )
     }
 }
