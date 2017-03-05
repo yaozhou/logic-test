@@ -14,7 +14,7 @@ import Score from './components/Score'
 import Container from './components/Container'
 import Wx from './components/Wx'
 import Prize from './components/Prize'
-import Login from './components/Login'
+import AdminLogin from './components/Admin/AdminLogin'
 import Admin from './components/Admin'
 
 
@@ -30,7 +30,7 @@ ReactDOM.render((
                 <Route path="/ranking" component={Ranking} />
                 <Route path="/cover" component={Cover} />
                 <Route path="/prize" component={Prize} />
-                <Route path="/login" component={Login} />
+                <Route path="/login" component={AdminLogin} />
                 <Route path="/admin" component={Admin} />
             </Route>
         </Router>

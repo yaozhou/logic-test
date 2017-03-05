@@ -29,7 +29,11 @@ export default class Puzzle extends Component {
         }
     }
 
+
     finish_test() {
+        if (this.state.finished) return ;
+
+        this.state.finished = true ;
         let param = { 
                 test_id : this.state.test_id, 
                 answers : this.state.answer,
@@ -40,7 +44,9 @@ export default class Puzzle extends Component {
         }.bind(this)) ;
     }
 
-    componentDidMount() {
+    componentDidMount() {    
+        query('/api/count', {type : 'test'}) ;
+
         query('/api/test_begin', {}).then(function(ret) {
               this.setState({
                   test_id : ret.test_id,

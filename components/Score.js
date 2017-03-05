@@ -2,6 +2,7 @@ import React, { Component }  from 'react' ;
 import Button from 'react-bootstrap/lib/Button'
 import { connect } from 'react-redux'
 import { query } from './state'
+import Panel from 'react-bootstrap/lib/Panel'
 
 import { useRouterHistory } from 'react-router';
 import { createHashHistory } from 'history';
@@ -20,7 +21,9 @@ export default class Score extends Component {
         }
     }
 
-    componentDidMount() {
+    componentDidMount() {    
+        query('/api/count', {type : 'result'}) ;    
+
         query('/api/score_share', {test_id : this.props.location.query.test_id}).then(function(ret) {
                 this.setState({
                     name : ret.name,
@@ -40,12 +43,14 @@ export default class Score extends Component {
 
             content = (
                         <div>
-                        <div className='short_comment'>{ short_comment}</div>
+                        <Panel header="结果评分">
+                        <h4>{ short_comment}</h4>
+                        <hr />
                         <h5>{ this.state.comment}</h5>
-
-                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push('/cover')}>开始测试</Button>
-                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push("/ranking")}>排行榜</Button>
-                        <Button bsStyle="primary" bsSize="large" className="score_button" onClick={() => History.push('/prize')}>关注奖金池 </Button>
+                        </Panel>
+                        <Button bsStyle="success" bsSize="large" className="score_button" onClick={() => History.push('/cover')}>开始测试</Button>
+                        <Button bsStyle="info" bsSize="large" className="score_button" onClick={() => History.push("/ranking")}>排行榜</Button>
+                        <Button bsStyle="warning" bsSize="large" className="score_button" onClick={() => History.push('/prize')}>奖金池</Button>
                         </div>
                 )
 

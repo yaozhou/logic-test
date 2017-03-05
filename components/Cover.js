@@ -17,6 +17,10 @@ export default class Cover extends Component {
         }
     }
 
+    componentDidMount() {
+        query('/api/count', {type : 'cover'}) ;        
+    }
+
     start_test() {
         if (this.state.item_price == 0)
             History.replace("/puzzle") ;

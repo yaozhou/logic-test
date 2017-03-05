@@ -55,7 +55,7 @@ export default class extends Component {
                     </div>
     }
 
-    want_money() {
+    want_money() {        
         var t = this.state.pre_month.filter((v) => v.users_id == store.user.openid) ;
         if (t.length != 0) {
             alert('亲，你没有出现在名单中哦，没关系，我们努力超越') ;
@@ -64,8 +64,16 @@ export default class extends Component {
         }
     }
 
-    register() {        
-        
+    register() {
+        let r = this.state.pre_month.find((v) => v.openid == store.user.openid) ;
+        console.log(r) ;
+        if (r) {
+            query('/api/prize_mark', {id : r.prize_id, mark : this.contact.value.trim()})
+                .then((ret) => {
+                    this.setState({show_diag : false}) ;
+                    alert('提交成功! 我们会尽快与您联系.')                    
+                }) ;
+        }
     }
 
     render () {        
@@ -85,18 +93,22 @@ export default class extends Component {
         return (
             <div>
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
-                            <Tab eventKey={1} title="上月奖金榜单">
-                                    {pre_month_ary}
-                            </Tab>
-                            <Tab eventKey={2} title="本月累计奖金">
+
+                            <Tab eventKey={1} title="本月累计奖金">
                                     {month_ary}
                             </Tab>                                    
-                            <Tab eventKey={3} title="年度累计奖金">
+                            <Tab eventKey={2} title="年度累计奖金">
                                     {year_ary}
                             </Tab>
+                            { !this.props.hide_last_month ? (
+                            <Tab eventKey={3} title="上月奖金榜单">
+                                    {pre_month_ary}
+                                    <Button bsStyle="primary" bsSize="large" className="score_button" onClick={this.want_money.bind(this)}>我要去领奖 </Button>
+                            </Tab> ) : 
+                                null }
                     </Tabs>
+                    
                     <div className="static-modal">
-
                       <Modal
                           show={this.state.show_diag}
                           onHide={() => this.setState({show_diag : false})}
@@ -109,20 +121,20 @@ export default class extends Component {
                           <Modal.Body>
                                 <form>
                                 <FormGroup>
-                                <FormControl type="text">
+                                <FormControl type="text" inputRef={ref => this.contact = ref}>
                                 </FormControl>
                                 </FormGroup>
                                 </form>
 
                           </Modal.Body>
                           <Modal.Footer>
-                            <Button onClick={this.register}>确定</Button>
+                            <Button onClick={this.register.bind(this)}>确定</Button>
                             <Button onClick={() => this.setState({show_diag : false})}>取消</Button>
                           </Modal.Footer>
                         </Modal>
                         </div>                         
 
-                    <Button bsStyle="primary" bsSize="large" className="score_button" onClick={this.want_money.bind(this)}>我要去领奖 </Button>
+
             </div>
         )
     }

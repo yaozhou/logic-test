@@ -39,7 +39,9 @@ export default class Container extends Component {
         if (code != null) {
             p = query('http://www.logictest.net/api/login_by_code', {code : code}) ;
         }else if (debug == 'true') {
-            p = query('/api/login_by_cheat', {}) ;
+            p = query('/api/login_by_cheat', {}).then(function(ret) {
+                store.user = ret ;
+            }) ;
         }
         
         function process_conf() {
@@ -70,7 +72,10 @@ export default class Container extends Component {
     
     return (
                 <div>
-                    <PageHeader >{this.state.title} </PageHeader>
+                    <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <h3>{this.state.title}</h3>
+                    </div>
+                    <hr />
                     { this.state.title == null ?  null : this.props.children }
                 </div>
     )

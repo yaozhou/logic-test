@@ -9,6 +9,9 @@ import FormControl from 'react-bootstrap/lib/FormControl'
 import InputGroup from 'react-bootstrap/lib/InputGroup'
 import Button from 'react-bootstrap/lib/Button'
 import Checkbox from 'react-bootstrap/lib/Checkbox'
+import Col from 'react-bootstrap/lib/Col'
+import ButtonToolbar from 'react-bootstrap/lib/ButtonToolbar'
+import Well from 'react-bootstrap/lib/Well'
 
 import { query, store } from '../state'
 
@@ -18,6 +21,7 @@ export default class extends Component {
 
             this.state = {
                     puzzles : [],
+                    in_add : false,
                     in_edit : -1,
                     enable : true,                    
             }
@@ -26,9 +30,20 @@ export default class extends Component {
         componentDidMount() {
            query('/api/admin/puzzle_all_get', {}).then(function(ret) {
                   this.setState({puzzles : ret}) ;
-                  console.log(ret) ;
            }.bind(this)) ;
         }  
+
+        del(idx) {
+            let id = this.state.puzzles[idx].id ;
+
+            query('/api/admin/puzzle_del', {id : id})
+                .then(function(ret) {
+                    if(ret.code == 0) {
+                        let p = this.state.puzzles.filter((v) => v.id != id) ;
+                        this.setState({puzzles : p}) ;
+                    }
+                }.bind(this))
+        }
 
         modify() {
             let question = this.question.value ;
@@ -43,6 +58,33 @@ export default class extends Component {
             if (this.refs.choose_d.checked) answer = 'd' ;
             let enable = this.state.enable ;
 
+            if (answer_a == '' || answer_b  == '' || answer_c == '' || answer_d == '' || answer == '' )  {
+                alert('信息不完整') ; return ;
+            }
+
+            let q = {
+                        question : question, 
+                        a : answer_a,
+                        b : answer_b,
+                        c : answer_c,
+                        d : answer_d,
+                        answer : answer,
+                        enable : enable ? 1 : 0,
+                  } ;
+
+            if (this.state.in_edit >= 0) 
+                  q.id = this.state.puzzles[this.state.in_edit].id ;
+
+            query('/api/admin/puzzle_set', q)
+                .then(function(ret) {
+                    if (this.state.in_edit >= 0) { // 修改题目
+                        this.state.puzzles[this.state.in_edit] = q ;
+                    }else {
+                        this.state.puzzles.push(ret.detail)
+                    }
+                    
+                    this.setState({in_edit : -1, in_add : false}) ;
+                }.bind(this))
 
             console.log(question, answer_a, answer_b, answer_c, answer_d, answer, enable) ;
         }
@@ -50,31 +92,39 @@ export default class extends Component {
     render () {
           let  content = this.state.puzzles.map(function(v, idx) {
               return (
-                      <Panel key={idx} collapsible defaultExpanded header={`ID(${v.id}) ` +  v.question}>
+                      <Panel key={idx} collapsible defaultExpanded header={`${v.id}: ` +  v.question}>
                           
                       <ListGroup fill>
-                        <ListGroupItem bsStyle={v.answer == 'a' ? "success" : "info"}>{v.a}</ListGroupItem>
-                        <ListGroupItem bsStyle={v.answer == 'b' ? "success" : "info"}>{v.b}</ListGroupItem>
-                        <ListGroupItem bsStyle={v.answer == 'c' ? "success" : "info"}>{v.c}</ListGroupItem>
-                        <ListGroupItem bsStyle={v.answer == 'd' ? "success" : "info"}>{v.d}</ListGroupItem>
-                      </ListGroup>
-                       <Button type="submit" onClick={() => this.setState({in_edit : idx})}> 修改 </Button>
-                       <Button type="submit" > 删除 </Button>
+                        <ListGroupItem bsStyle={v.answer == 'a' ? "success" : null}>{'A: ' + v.a}</ListGroupItem>
+                        <ListGroupItem bsStyle={v.answer == 'b' ? "success" : null}>{'B: ' + v.b}</ListGroupItem>
+                        <ListGroupItem bsStyle={v.answer == 'c' ? "success" : null}>{'C: ' + v.c}</ListGroupItem>
+                        <ListGroupItem bsStyle={v.answer == 'd' ? "success" : null}>{'D: ' + v.d}</ListGroupItem>
+                        </ListGroup>
+                       
+                       <ButtonToolbar>
+                        <Button onClick={() => this.setState({in_edit : idx})}> 修改 </Button>                       
+                       <Button onClick={this.del.bind(this, idx)}> 删除 </Button>
+                       </ButtonToolbar>
+                       
                         
                     </Panel>
                 )
           }.bind(this)) ;
 
+          let puzzle_in_edit = (this.state.in_edit >= 0 ? this.state.puzzles[this.state.in_edit] : null) ;
 
            return (
-                  <div>
+                  <div>                    
                       {content}
+                       <Well>                      
+                      <Button bsStyle="primary" onClick={() => this.setState({in_add : true}) }> {`当前共${this.state.puzzles.length}题 : 新增`} </Button>
+                      </Well>
 
                       <div className="static-modal">
 
                       <Modal
-                          show={this.state.in_edit >= 0}
-                          onHide={() => this.setState({in_edit : -1})}
+                          show={this.state.in_edit >= 0 || this.state.in_add}
+                          onHide={() => this.setState({in_edit : -1, in_add : false})}
                           container={this}
                           aria-labelledby="contained-modal-title"
                         >
@@ -84,50 +134,68 @@ export default class extends Component {
                           <Modal.Body>
                                 <form>
                                   <FormGroup>
-                                  <FormControl type="text" inputRef={ref => this.question = ref}>
+                                  <FormControl type="text" 
+                                        componentClass="textarea"
+                                        inputRef={ref => this.question = ref} 
+                                        defaultValue={ puzzle_in_edit ? puzzle_in_edit.question : '' } >
                                   </FormControl>
                                   </FormGroup>
 
                                  <FormGroup>
                                   <InputGroup>
-                                    <InputGroup.Addon>
-                                      <input type="radio" name="answer" aria-label="..." ref="choose_a"/>
+                                  <InputGroup.Addon>
+                                      <input type="radio" name="answer" aria-label="..." ref="choose_a" 
+                                              defaultChecked={puzzle_in_edit ? puzzle_in_edit.answer == 'a' : false} />
                                     </InputGroup.Addon>
-                                    <FormControl type="text" inputRef={ref => this.answer_a = ref}/>
+                                    <FormControl type="text" 
+                                            inputRef={ref => this.answer_a = ref}
+                                            defaultValue={ puzzle_in_edit ? puzzle_in_edit.a : '' }
+                                            />
                                   </InputGroup>
 
                                   <InputGroup>
                                     <InputGroup.Addon>
-                                      <input type="radio" name="answer" aria-label="..." ref="choose_b"/>
+                                      <input type="radio" name="answer" aria-label="..." ref="choose_b" 
+                                            defaultChecked={puzzle_in_edit ? puzzle_in_edit.answer=='b' : false} />
                                     </InputGroup.Addon>
-                                    <FormControl type="text" inputRef={ref => this.answer_b = ref}/>
+                                    <FormControl type="text" 
+                                            inputRef={ref => this.answer_b = ref}
+                                            defaultValue={ puzzle_in_edit ? puzzle_in_edit.b : ''}
+                                            />
                                   </InputGroup>
 
                                   <InputGroup>
                                     <InputGroup.Addon>
-                                      <input type="radio" name="answer" aria-label="..." ref="choose_c"/>
+                                      <input type="radio" name="answer" aria-label="..." ref="choose_c" 
+                                            defaultChecked={puzzle_in_edit ?  puzzle_in_edit.answer=='c' : false} />
                                     </InputGroup.Addon>
-                                    <FormControl type="text" inputRef={ref => this.answer_c = ref}/>
+                                    <FormControl type="text" 
+                                        inputRef={ref => this.answer_c = ref}
+                                        defaultValue={ puzzle_in_edit ? puzzle_in_edit.c : '' }
+                                        />
                                   </InputGroup>
 
                                   <InputGroup>
                                     <InputGroup.Addon>
-                                      <input type="radio" name="answer" aria-label="..." ref="choose_d" / >
+                                      <input type="radio" name="answer" aria-label="..." ref="choose_d" 
+                                            defaultChecked={puzzle_in_edit ? puzzle_in_edit.answer=='d' : false} / >
                                     </InputGroup.Addon>
-                                    <FormControl type="text" inputRef={ref => this.answer_d = ref}/>
+                                    <FormControl type="text" 
+                                            inputRef={ref => this.answer_d = ref}
+                                            defaultValue= { puzzle_in_edit ? puzzle_in_edit.d : '' }
+                                            />
                                   </InputGroup>
                                 </FormGroup>
-
-                                <Checkbox inline defaultChecked={this.state.enable} onChange={() => this.setState({enable : !this.state.enable})}>
+                                <Checkbox inline defaultChecked={puzzle_in_edit ? puzzle_in_edit.enable == 1 : false}
+                                              onChange={() => this.setState({enable : !this.state.enable})}>
                                   是否启用
-                                </Checkbox>
-                       
+                                </Checkbox>                       
                                 </form>
 
                           </Modal.Body>
                           <Modal.Footer>
                             <Button onClick={this.modify.bind(this)}>确定</Button>
-                            <Button onClick={() => this.setState({in_edit : -1})}>取消</Button>
+                            <Button onClick={() => this.setState({in_edit : -1, in_add : false})}>取消</Button>
                           </Modal.Footer>
                         </Modal>
                         </div>    

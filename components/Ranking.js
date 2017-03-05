@@ -16,6 +16,8 @@ export default class Ranking extends Component {
     }
 
     componentDidMount() {
+         query('/api/count', {type : 'ranking'}) ;
+
         query('/api/score_list', {}).then(function(ret) {
             this.setState({
                 pre_week : ret.pre_week,

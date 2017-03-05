@@ -13,24 +13,33 @@ import Col from 'react-bootstrap/lib/Col'
 
 import {Uploader } from 'react-file-upload'
 import PuzzleStat from './Admin/PuzzleStat'
-import AdminBasic from './AdminBasic'
+import AdminBasic from './Admin/AdminBasic'
 import PuzzleSetting from './Admin/PuzzleSetting'
+import AdminPrize from './Admin/AdminPrize'
+import AdminChart from './Admin/AdminChart'
+import AdminProfit from './Admin/AdminProfit'
+import AdminImage from './Admin/AdminImage'
+import Ranking from './Ranking'
+import  Prize from './Prize'
+
 import { query, store } from './state'
 
 
 export default class extends Component {
-
-
-
+  
 
     render () {        
             return (
+                    <div>
+                    <Col sm={1}>
+                    </Col>
+                    <Col sm={10}> 
                     <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
                             <Tab eventKey={1} title="基本设置">
                                     <AdminBasic />
                             </Tab>
                             <Tab eventKey={2} title="图片设置">
-                                      <Uploader url='/api/admin/cover_upload' checkType={true} multiple={true}/>
+                                      <AdminImage />
                             </Tab>                                    
                             <Tab eventKey={3} title="题目正确率">
                                       <PuzzleStat />
@@ -38,10 +47,25 @@ export default class extends Component {
                              <Tab eventKey={4} title="题目设置">
                                       <PuzzleSetting />
                             </Tab>
-                             <Tab eventKey={5} title="退出登陆">
-
+                             <Tab eventKey={5} title="已结算奖金池管理">
+                                      <AdminPrize />
                             </Tab>
+                            <Tab eventKey={6} title="当前累计奖金">
+                                      <Prize hide_last_month={true}/>
+                            </Tab>
+                            <Tab eventKey={7} title="利润表">
+                                      <AdminProfit />
+                            </Tab>
+                            <Tab eventKey={8} title="统计">
+                                      <AdminChart />
+                            </Tab>
+                            <Tab eventKey={9} title="排行榜">
+                                      <Ranking />
+                            </Tab>
+
                     </Tabs>
+                  </Col>
+                  </div>
                 )
 
     }

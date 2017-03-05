@@ -32,6 +32,8 @@ var multer  =   require('multer');
 var exec = require('child_process').exec ;
 var sqlite3 = require('sqlite3').verbose() ;
 var Moment = require('moment') ;
+Moment.locale('cn', {week:{dow:1}}) ;  // 设置从星期一开始算一个星期
+
 var xml2js = require('xml2js') ;
 var random_string = require('randomstring') ;
 var later = require('later') ;
@@ -61,7 +63,7 @@ var allowCrossDomain = function(req, res, next) {
 
 // 各种中间件
 app.use(allowCrossDomain);
-app.use(bodyParser.json('1mb')) ;
+app.use(bodyParser.json('2mb')) ;
 app.use(bodyParser.urlencoded({extended: true})) ;
 app.use(bodyParser.xml());
 app.use(express_session({ secret: 'keyboard cat', resave:false, saveUninitialized: false }))
@@ -132,7 +134,7 @@ var YEAR_PRIZE_RATIO = [0.3, 0.1, 0.05, 0.03, 0.02, 0.01] ;
 
 function ranking_prize(db, start, end, ratio) {
     return Promise.all([
-          prize_list(db, start, end),
+          profit(db, start, end),
           ranking(db, start, end),
       ])
     .then(function(ret) {
@@ -207,6 +209,12 @@ later.date.localTime() ;
 //caculate_pre_month_prize() ;
 later.setInterval(caculate_pre_month_prize, month_sche) ;
 later.setInterval(caculate_pre_year_prize, year_sche) ;
+
+
+// prize.forge({id : 2}).fetch().then(function(model) {
+//     if (model != null) 
+//       new prize({id : 2}).save({mark : "测试下"}) ;    
+// }) ;
 
 
 // var order_ret = { 
@@ -346,13 +354,13 @@ function generate_client_wx_config() {
 
 // for debug
 app.post('/*', function(req, res, next) {
-    console.log('post ' + req.url + ' param: ' + JSON.stringify(req.body)) ;
+   // console.log('post ' + req.url + ' param: ' + JSON.stringify(req.body)) ;
     next() ;
 })
 
 // for debug
 app.get('/*', function(req, res, next) {
-    console.log(req.connection.remoteAddress + ' get ' + req.url) ;
+    //console.log(req.connection.remoteAddress + ' get ' + req.url) ;
     next() ;
 })
 
@@ -440,7 +448,8 @@ app.post('/order_notify', function(req, resp) {
   })    
 })
 
-function prize_list(db, start, end) {
+
+function profit(db, start, end) {
      let sql = 'select SUM(total_fee) as money from money where date("create_time") >= "' + 
                         start + '" and date(create_time) <=  "' + end  + '"' ;
     return sql_promise(db, sql) ;
@@ -448,13 +457,53 @@ function prize_list(db, start, end) {
 
 
 function last_prize_list(db, t, type) {
-    var sql = 'select prize.test_id as prize_test_id, prize.date as prize_date , prize.type as prize_type, prize.test_id as prize_test_id, prize.ranking as prize_ranking, prize.money as prize_money, prize.mark as prize_mark, test.id as test_id, test.start_time as test_start_time, test.score as test_score, test.user_id as test_user_id, test.score_100 as test_score_100, test.test_time as test_test_time, users.id as users_id, users.username as users_username, users.password as users_password, users.point as users_point, users.head_img as users_head_img  from  prize left join test on prize.test_id == test.id left join users  on test.user_id == users.id where prize_type == "' + type + '" and prize_date == "' + t + '"' ;
+    var sql = 'select prize.test_id as prize_test_id, prize.date as prize_date , prize.type as prize_type, prize.test_id as prize_test_id, prize.ranking as prize_ranking, prize.money as prize_money, prize.user_mark as prize_user_mark,  prize.admin_mark as prize_admin_mark, prize.id as prize_id, test.id as test_id, test.start_time as test_start_time, test.score as test_score, test.user_id as test_user_id, test.score_100 as test_score_100, test.test_time as test_test_time, users.id as users_id, users.username as users_username, users.password as users_password, users.point as users_point, users.head_img as users_head_img  from  prize left join test on prize.test_id == test.id left join users  on test.user_id == users.id where prize_type == "' + type + '" and prize_date == "' + t + '"' ;
 
     return sql_promise(db, sql) ;
 }
 
+app.post('/api/admin/prize_mark', function(req, resp) {
+
+   // 此处完全信任客户端发来的序号,
+    prize.forge({id : req.body.id}).fetch().then(function(model) {
+      if (model != null) {
+          new prize({id : req.body.id}).save({admin_mark : req.body.mark}) ;
+      }
+    }) ;
+    
+    resp.send({code : 0}) ;
+})
+
+app.post('/api/prize_mark', function(req, resp) {
+
+   // 此处完全信任客户端发来的序号,
+    prize.forge({id : req.body.id}).fetch().then(function(model) {
+      if (model != null) {
+          new prize({id : req.body.id}).save({user_mark : req.body.mark}) ;
+      }
+    }) ;
+    
+    resp.send({code : 0}) ;
+})
+
+app.post('/api/profit_list', function(req, resp) {
+      let sql = 'select * from money where date("create_time") >= "' + req.body.start + '" and date(create_time) <=  "' + req.body.end  + '"' ;
+
+
+      sql_promise(db, sql).then(function(ret) {
+          //console.log(ret) ;
+          resp.send(ret) ;
+      }).catch(err => {
+          //console.log(err) ;
+      }) ;
+})
+
+
 
 app.post('/api/last_prize', function(req, resp) {
+
+
+
     var last_month =  new Moment().startOf('month').subtract(1, 'days').startOf('month').format('YYYY-MM') ;
     var last_year = new Moment().startOf('year').subtract(1, 'days').startOf('year').format('YYYY') ;
 
@@ -463,10 +512,12 @@ app.post('/api/last_prize', function(req, resp) {
           last_prize_list(db, last_year, 'year'),
       ])
     .then(function(ret) {
-          console.log(ret) ;
+          //console.log(ret) ;
           resp.send({last_month : ret[0], last_year : ret[1]}) ;
-    })
-
+    }).catch( function(err) {
+      console.log(err) ;
+    });
+    
 })
 
 
@@ -475,7 +526,7 @@ app.post('/api/prize_money', function(req, resp) {
     var cur_month_end = new Moment().endOf('month').format('YYYY-MM-DD') ;
 
     var year_start = new Moment().startOf('year').format('YYYY-MM-DD') ;
-    var year_end = Moment().endOf('year').format('YYYY-MM-DD') ;    
+    var year_end = Moment().endOf('year').format('YYYY-MM-DD') ;
 
     Promise.all([
         ranking_prize(db, cur_month_start, cur_month_end, MONTH_PRIZE_RATIO),
@@ -483,7 +534,7 @@ app.post('/api/prize_money', function(req, resp) {
         ])
     .then(function(ret) {        
         var r = {month_ranking : ret[0], year_ranking : ret[1] } ;
-        console.log(r) ;
+        //console.log(r) ;
         resp.send(JSON.stringify(r)) ;
     }).catch(function(err) {
         console.log(err) ;
@@ -512,7 +563,7 @@ app.post('/api/login_by_cheat', function(req, resp) {
             }
       } ;
 
-      console.log(req.session) ;
+      //console.log(req.session) ;
 
       resp.send(JSON.stringify(req.session.wx)) ;
 })
@@ -520,7 +571,7 @@ app.post('/api/login_by_cheat', function(req, resp) {
 app.post('/api/login_by_code', function(req, resp) {
       var url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + APP_ID + 
                       '&secret=' + APP_SECRET + '&code=' + req.body.code + '&grant_type=authorization_code' ;
-      console.log("try to get token: \n" + url) ;
+      //console.log("try to get token: \n" + url) ;
 
     // 用code 换 token                      
     request.get(url, function(err, res, token_raw) {
@@ -582,10 +633,10 @@ app.post('/api/score_share', function(req, res) {
 
         info.comment = g_conf.comment[n] ;
         info.short_comment = g_conf.short_comment[n] ;
-        console.log(JSON.stringify(model)) ;
+        //console.log(JSON.stringify(model)) ;
         info.name = model.relations.user.attributes.username ;
 
-        console.log(info) ;
+        //console.log(info) ;
         res.send(JSON.stringify(info)) ;
     }) ;
 })
@@ -600,8 +651,9 @@ app.post('/api/msg_list', function(req, res) {
 })
 
 function ranking(db, start, end) {
-  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, test.score_100 as score_100, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  order by score desc, test_time asc limit 100' ;
 
+  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, MAX(test.score_100) as score_100, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  group by test.user_id  order by score desc, test_time asc limit 100' ;
+  console.log(sql) ;
   // var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
   //                   'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +
   //                  " order by score desc, test_time asc limit 100" ;
@@ -615,11 +667,11 @@ app.post('/api/score_list', function(req, res) {
     var d = new Moment() ;
     var arg = {} ;
 
-    var week_start = new Moment().startOf('week').add(1, 'days').format('YYYY-MM-DD') ;
-    var week_end = new Moment().startOf('week').add(1, 'days').add(7, 'days').format('YYYY-MM-DD') ;
+    var week_start = new Moment().startOf('week').format('YYYY-MM-DD') ;
+    var week_end = new Moment().startOf('week').add(7, 'days').format('YYYY-MM-DD') ;
 
-    var pre_week_start = new Moment().startOf('week').add(1, 'days').add(-7, 'days') ;
-    var pre_week_end = new Moment().startOf('week').add(1, 'days') ;
+    var pre_week_start = new Moment().startOf('week').subtract(7, 'days').format('YYYY-MM-DD') ;
+    var pre_week_end = new Moment().startOf('week').format('YYYY-MM-DD') ;
 
     var year_start = new Moment().startOf('year').format('YYYY-MM-DD') ;
     var year_end = new Moment().startOf('year').add(1, 'years').format('YYYY-MM-DD') ;
@@ -703,8 +755,8 @@ app.post('/api/count', function(req, res) {
 
 app.post('/api/conf_get', function(req, res) {
     //var user_id = req.session.user_id ;
-    console.log(typeof req.body) ;
-    console.log(req.body) ;
+    //console.log(typeof req.body) ;
+    //console.log(req.body) ;
 
     conf.forge({id:1}).fetch().then(function(c) {        
         //console.log(c.attributes) ;
@@ -773,7 +825,7 @@ app.post('/api/test_begin', function(req, res) {
                 puzzle_ary = randArray(puzzle_ary, g_conf.question_num) ;
             
                 test.forge().save({user_id:user_id, score : -1, score_100 : -1, test_time : -1}).then(function(collection) {
-                  console.log(collection.attributes) ;
+                  //console.log(collection.attributes) ;
                   var test_id = collection.attributes.id ;
 
                   async.forEach(puzzle_ary, function(p, callback) {
@@ -795,14 +847,14 @@ app.post('/api/test_finish', function(req, res) {
     var answers = req.body.answers ;
     //req.body.user_name = new Buffer(req.body.user_name, 'base64').toString() ;
     var score = 0 ;
-    console.log('test finish\n' + typeof req.body) ;
-    console.log(req.body) ;
+    //console.log('test finish\n' + typeof req.body) ;
+    //console.log(req.body) ;
 
     async.forEach(req.body.answers, function(p, callback) {
         question.forge({test_id: req.body.test_id, puzzle_id:p.id}).fetch({withRelated: ['test', 'puzzle']}).then(function(q) {
-                console.log(q.attributes) ;
-                console.log(q.relations.test.attributes) ;
-                console.log(q.relations.puzzle.attributes) ;
+                //console.log(q.attributes) ;
+                //console.log(q.relations.test.attributes) ;
+                //console.log(q.relations.puzzle.attributes) ;
 
                 var update_question = {id:q.id, answer:p.answer} ;
                 update_question.score = (p.answer == q.relations.puzzle.attributes.answer ? 1 : 0) ;
@@ -828,7 +880,7 @@ app.post('/api/test_finish', function(req, res) {
 })
 
 app.post('/api/admin/*', function(req, res, next) {
-    console.log(req.session) ;
+    //console.log(req.session) ;
     if (req.session.user_name != 'admin')
         res.send(JSON.stringify({code:1, msg:"need auth"})) ;
     else
@@ -899,6 +951,7 @@ app.post('/api/admin/puzzle_all_get', function(req, res) {
         async.forEach(r, function(p, callback) {
 
           db.all('select * from question where puzzle_id == ' + p.id + ' and score != -1', function(err, rows) {
+              if (err) console.log(err) ;
              var score = rows.filter(function(e) { return e.score == 1}).length ;
              //if (p.id == 58)
               //console.log('共' + rows.length + ', 答对' + score) ;
@@ -920,7 +973,7 @@ app.post('/api/admin/cover_upload',function(req,res) {
         }
 
         req.files.forEach(function(file, idx) {
-            var cmd = "mv  \"uploads/" + file.filename + "\"  web/img/cover.jpg" ;
+            var cmd = "mv  \"uploads/" + file.filename + "\"  static/img/cover.jpg" ;
             exec(cmd) ;
             console.log("cmd:" + cmd) ;
             res.redirect("/admin.html?sub=conf") ;
@@ -933,7 +986,9 @@ app.post('/api/admin/puzzle_set', function(req, res) {
   console.log(req.body) ;
   puzzle.forge(req.body).save().then(function(p) {
       console.log(p) ;
-      res.send(JSON.stringify({code:0})) ;
+      var ret = {code : 0} ;
+      ret.detail = p ;
+      res.send(JSON.stringify(ret)) ;
   }) 
 })
 

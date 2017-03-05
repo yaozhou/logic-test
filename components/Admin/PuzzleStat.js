@@ -25,7 +25,7 @@ export default class extends Component {
     componentDidMount() {
          query('/api/admin/puzzle_all_get', {}).then(function(ret) {
                 this.setState({puzzles : ret}) ;
-                console.log(ret) ;
+  //              console.log(ret) ;
          }.bind(this)) ;
     }
 
@@ -39,7 +39,7 @@ export default class extends Component {
                             <td>{v.id}</td>
                             <td>{v.tester_num}</td>
                             <td>{v.right_num}</td>
-                            <td>{v.ratio}</td>
+                            <td>{v.ratio != 'N' ? v.ratio + '%' : '/'}</td>
                             <td>{ v.enable ? "√" : "x" }</td>
                         </tr>
                 )
