@@ -453,7 +453,7 @@ app.post('/order_notify', function(req, resp) {
 
 
 function profit(db, start, end) {
-     let sql = 'select SUM(total_fee) as money from money where date("create_time") >= "' + 
+     var sql = 'select SUM(total_fee) as money from money where date("create_time") >= "' + 
                         start + '" and date(create_time) <=  "' + end  + '"' ;
     return sql_promise(db, sql) ;
 }
@@ -490,7 +490,7 @@ app.post('/api/prize_mark', function(req, resp) {
 })
 
 app.post('/api/profit_list', function(req, resp) {
-      let sql = 'select * from money where date("create_time") >= "' + req.body.start + '" and date(create_time) <=  "' + req.body.end  + '"' ;
+      var sql = 'select * from money where date("create_time") >= "' + req.body.start + '" and date(create_time) <=  "' + req.body.end  + '"' ;
 
 
       sql_promise(db, sql).then(function(ret) {
