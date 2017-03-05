@@ -57,7 +57,7 @@ export default class extends Component {
 
     want_money() {        
         var t = this.state.pre_month.filter((v) => v.users_id == store.user.openid) ;
-        if (t.length != 0) {
+        if (t.length == 0) {
             alert('亲，你没有出现在名单中哦，没关系，我们努力超越') ;
         }else {
             this.setState({show_diag : true})

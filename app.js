@@ -17,7 +17,6 @@ import Prize from './components/Prize'
 import AdminLogin from './components/Admin/AdminLogin'
 import Admin from './components/Admin'
 
-
 let element = document.getElementById('reactEntry');
 ReactDOM.render(( 
         <Router history={hashHistory}>

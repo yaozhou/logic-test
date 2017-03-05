@@ -34,12 +34,12 @@ export default class Container extends Component {
         let p = null ;
 
         let code = this.props.location.query.code ;
-        let debug = this.props.location.query.debug ;
-
+        let debug = this.props.location.query.debug ;        
+        
         if (code != null) {
             p = query('http://www.logictest.net/api/login_by_code', {code : code}) ;
         }else if (debug == 'true') {
-            p = query('/api/login_by_cheat', {}).then(function(ret) {
+            p = query('/api/login_by_cheat', {}).then(function(ret) {                
                 store.user = ret ;
             }) ;
         }
@@ -76,7 +76,7 @@ export default class Container extends Component {
                     <h3>{this.state.title}</h3>
                     </div>
                     <hr />
-                    { this.state.title == null ?  null : this.props.children }
+                    { this.state.title == null ?  null : this.props.children } 
                 </div>
     )
   }

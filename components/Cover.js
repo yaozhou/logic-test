@@ -2,11 +2,18 @@ import React, { Component } from 'react' ;
 import Image from 'react-bootstrap/lib/Image'
 import Button from 'react-bootstrap/lib/Button'
 import { store, query } from './state'
+import Panel from 'react-bootstrap/lib/Panel'
 var wx = require ('./jweixin-1.2.0.js')
 
 import { useRouterHistory } from 'react-router';
 import { createHashHistory } from 'history';
 const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
+
+//import '../static/css/logic_test.css' ;
+//import '../static/css/css/bootstrap.min.css'
+
+//require("!style-loader!css-loader!../static/css/logic_test.css") ;
+//require("!style-loader!css-loader!../static/css/css/bootstrap.min.css") ;
 
 export default class Cover extends Component {
     constructor(props) {
@@ -50,8 +57,10 @@ export default class Cover extends Component {
             let ary = this.state.cover_text.split('\n').map((text, idx) => (<div key={idx}>{text}</div>))
 
             content = ( <div>
+                                    <Panel>
                                     <Image src="img/cover.jpg" responsive />
                                     <h4>{ary}</h4>
+                                    </Panel>
                                     <Button bsStyle="primary" bsSize="large" onClick={this.start_test.bind(this)} block>开始测试</Button>
                                 </div>)
         }

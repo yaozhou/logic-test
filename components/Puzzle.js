@@ -7,7 +7,9 @@ import Button from 'react-bootstrap/lib/Button'
 import ListGroup from 'react-bootstrap/lib/ListGroup'
 import ListGroupItem from 'react-bootstrap/lib/ListGroupItem'
 import Label from 'react-bootstrap/lib/Label'
-
+import Panel from 'react-bootstrap/lib/Panel'
+//import Loading from 'react-loading' ;
+var Loader = require('halogen/PulseLoader') ;
 import { store, query } from './state'
 
 import { useRouterHistory } from 'react-router';
@@ -47,6 +49,8 @@ export default class Puzzle extends Component {
     componentDidMount() {    
         query('/api/count', {type : 'test'}) ;
 
+
+
         query('/api/test_begin', {}).then(function(ret) {
               this.setState({
                   test_id : ret.test_id,
@@ -71,15 +75,21 @@ export default class Puzzle extends Component {
         if (this.state.interval != null) clearInterval(this.state.interval) ;
     }
 
-    puzzle_answer(index, o) {
-        this.state.answer[this.state.index] = { id : this.state.puzzle[index].id, answer : o } ;
+    move_forward(answer) {
+        let idx = this.state.index ;
+        this.state.answer[idx] = { id : this.state.puzzle[idx].id, answer : answer } ;
 
-        if (this.state.index + 1 == this.state.puzzle.length) {
+        if (idx + 1 == this.state.puzzle.length) {
             this.finish_test() ;
-        }else {
-            var next = this.state.index + 1 > this.state.puzzle.length ? 0 : this.state.index +  1 ;
-            this.setState({index : next}) ;
+        }else {            
+            this.setState({index : idx + 1}) ;
         }
+        this.interval = null ;
+    }
+
+    puzzle_answer(answer) {
+        if (this.interval != null) return ;
+        this.interval = setTimeout(this.move_forward.bind(this, answer), 500) ;
     }
 
     render () {
@@ -94,26 +104,26 @@ export default class Puzzle extends Component {
                           <ListGroup>
 
 
-                          <ListGroupItem  className="question_item">
-                          <Radio  name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'a')} >
+                          <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'a')}>
+                          <Radio  name="puzzle"  >
                             {v.a}
                           </Radio>              
                           </ListGroupItem>
 
-                           <ListGroupItem  className="question_item">
-                          <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'b')}>
+                           <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'b')}>
+                          <Radio name="puzzle">
                             {v.b}
                           </Radio>    
                           </ListGroupItem>
 
-                           <ListGroupItem className="question_item">
-                          <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'c')}>
+                           <ListGroupItem className="question_item" onClick = {this.puzzle_answer.bind(this, 'c')}>
+                          <Radio name="puzzle">
                             {v.c}
                           </Radio>
                           </ListGroupItem>
 
-                           <ListGroupItem  className="question_item">
-                          <Radio name="puzzle" onClick = {this.puzzle_answer.bind(this, this.state.index, 'd')}>
+                           <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'd')}>
+                          <Radio name="puzzle">
                             {v.d}
                           </Radio>
                           </ListGroupItem>
@@ -134,11 +144,19 @@ export default class Puzzle extends Component {
 
         return (
             <div>
+            <Panel>
             <Carousel controls={false} activeIndex={this.state.index} >
                   {ary}
             </Carousel>
-            <h4 className="progress"><Label>{(this.state.index+1) + '/' + this.state.puzzle.length}</Label></h4>
-            <h4 className="time">{time_str}</h4>
+            </Panel>
+
+                { this.state.puzzle.length > 0 ? (
+                    <div>
+                  <h4 className="progress"><Label>{(this.state.index+1) + '/' + this.state.puzzle.length}</Label></h4>
+                  <h4 className="time">{time_str}</h4>
+                  </div>
+                  ) : null }
+
             </div>
             )
     }

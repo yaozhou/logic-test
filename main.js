@@ -33,6 +33,7 @@ var exec = require('child_process').exec ;
 var sqlite3 = require('sqlite3').verbose() ;
 var Moment = require('moment') ;
 Moment.locale('cn', {week:{dow:1}}) ;  // 设置从星期一开始算一个星期
+var compression = require('compression')
 
 var xml2js = require('xml2js') ;
 var random_string = require('randomstring') ;
@@ -67,6 +68,8 @@ app.use(bodyParser.json('2mb')) ;
 app.use(bodyParser.urlencoded({extended: true})) ;
 app.use(bodyParser.xml());
 app.use(express_session({ secret: 'keyboard cat', resave:false, saveUninitialized: false }))
+app.use(compression({threshold: 300 * 1024})) ;
+app.use(express.static('static')) ;
 
 // 上传中间件
 var storage =   multer.diskStorage({
@@ -863,10 +866,7 @@ app.post('/api/test_finish', function(req, res) {
         })             
     }, function(err) {
         console.log('score=' + score) ;
-        var score_100 = parseInt(score  * 100 / answers.length) ;
-
-        
-        
+        var score_100 = parseInt(score  * 100 / answers.length) ;        
         
         var t = {id: req.body.test_id, score:score, score_100:score_100, test_time:req.body.test_time} ;
 
@@ -997,7 +997,7 @@ app.post('/api/admin/logout', function(req, res, next){
     res.send(JSON.stringify({code:0, to:"login.html"})) ;
 })
 
-app.use(express.static('static')) ;
+
 
   var server = app.listen(3000 , function () {
   var host = server.address().address;
