@@ -2,6 +2,7 @@ import React, { Component }  from 'react' ;
 import Tabs from 'react-bootstrap/lib/Tabs'
 import Tab from 'react-bootstrap/lib/Tab'
 import Image from 'react-bootstrap/lib/Image'
+import Panel from 'react-bootstrap/lib/Panel'
 import { query } from './state'
 
 export default class Ranking extends Component {
@@ -60,13 +61,19 @@ export default class Ranking extends Component {
         return (
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
                             <Tab eventKey={1} title="本周排行榜">
+                                    <Panel>
                                     {week_ary}
+                                    </Panel>
                             </Tab>
                             <Tab eventKey={2} title="上周排行榜">
+                                    <Panel>
                                     {pre_week_ary}
+                                    </Panel>
                             </Tab>                                    
                             <Tab eventKey={3} title="年度排行榜">
+                                    <Panel>
                                     {year_ary}
+                                    </Panel>
                             </Tab>
                     </Tabs>
         )

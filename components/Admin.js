@@ -19,6 +19,7 @@ import AdminPrize from './Admin/AdminPrize'
 import AdminChart from './Admin/AdminChart'
 import AdminProfit from './Admin/AdminProfit'
 import AdminImage from './Admin/AdminImage'
+import Session from './Admin/AdminSession'
 import Ranking from './Ranking'
 import  Prize from './Prize'
 
@@ -61,6 +62,9 @@ export default class extends Component {
                             </Tab>
                             <Tab eventKey={9} title="排行榜">
                                       <Ranking />
+                            </Tab>
+                            <Tab eventKey={10} title="登陆管理">
+                                      <Session />
                             </Tab>
 
                     </Tabs>

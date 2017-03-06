@@ -28,6 +28,7 @@ export default class Puzzle extends Component {
             left_time : store.cover.test_time,
             answer : [],
             interval : null,
+            cur_answer : '',
         }
     }
 
@@ -49,13 +50,15 @@ export default class Puzzle extends Component {
     componentDidMount() {    
         query('/api/count', {type : 'test'}) ;
 
-
-
         query('/api/test_begin', {}).then(function(ret) {
+              let a = ret.puzzle.map(function(v) {
+                  return {id : v.id, answer : ''}
+                }) ;
+
               this.setState({
                   test_id : ret.test_id,
                   puzzle : ret.puzzle,
-                  answer : new Array(ret.puzzle.length),                  
+                  answer : a,
               })
 
               var interval = setInterval(function() {
@@ -81,74 +84,111 @@ export default class Puzzle extends Component {
 
         if (idx + 1 == this.state.puzzle.length) {
             this.finish_test() ;
-        }else {            
-            this.setState({index : idx + 1}) ;
+        }else {
+            this.setState({index : idx + 1, cur_answer : ''}) ;
         }
         this.interval = null ;
     }
 
     puzzle_answer(answer) {
         if (this.interval != null) return ;
+        this.setState({cur_answer : answer}) ;
         this.interval = setTimeout(this.move_forward.bind(this, answer), 500) ;
     }
 
-    render () {
-        var ary = this.state.puzzle.map(function(v, idx) {
-            return (
-                 <Carousel.Item key={idx}>
-                 <form>
-                     <FormGroup>
-                     <h4>{v.question}</h4>
-                     </FormGroup>
-                        <FormGroup >
-                          <ListGroup>
+    render () {        
 
-
-                          <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'a')}>
-                          <Radio  name="puzzle"  >
-                            {v.a}
-                          </Radio>              
-                          </ListGroupItem>
-
-                           <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'b')}>
-                          <Radio name="puzzle">
-                            {v.b}
-                          </Radio>    
-                          </ListGroupItem>
-
-                           <ListGroupItem className="question_item" onClick = {this.puzzle_answer.bind(this, 'c')}>
-                          <Radio name="puzzle">
-                            {v.c}
-                          </Radio>
-                          </ListGroupItem>
-
-                           <ListGroupItem  className="question_item" onClick = {this.puzzle_answer.bind(this, 'd')}>
-                          <Radio name="puzzle">
-                            {v.d}
-                          </Radio>
-                          </ListGroupItem>
-
-                            </ListGroup>
-
-                        </FormGroup>
-                        </form>
-                  </Carousel.Item>
-              )
-        }.bind(this))
-
-       var m = Math.floor(this.state.left_time / 60) ;
+      var m = Math.floor(this.state.left_time / 60) ;
       var s = this.state.left_time % 60 ;
       if (m < 10) m = '0' + m ;
       if (s < 10) s = '0' + s ;
       var time_str = m + ':' + s ;
 
+//  因为button.list-group-item:hover   有阴影，所以从boot-strap的css里删掉了
+
+      let content = null ;
+      if (this.state.puzzle.length > 0) {
+           let v = this.state.puzzle[this.state.index] ;
+           content = (
+                  <Panel>
+                  <form>
+                     <FormGroup>
+                     <h4>{v.question}</h4>
+                     </FormGroup>
+
+                        <FormGroup >
+                          <ListGroup>
+
+                          {this.state.cur_answer == 'a' ?  (
+                                    <ListGroupItem  active onClick = {this.puzzle_answer.bind(this, 'a')}>
+                                    <Radio  name="puzzle" checked={true} >
+                                      {v.a}
+                                    </Radio>              
+                                    </ListGroupItem>
+                            ) : (
+                                    <ListGroupItem  onClick = {this.puzzle_answer.bind(this, 'a')}>
+                                    <Radio  name="puzzle"  >
+                                      {v.a}
+                                    </Radio>              
+                                    </ListGroupItem>
+                            )
+                        }
+                          
+                        {this.state.cur_answer == 'b' ? (
+                                <ListGroupItem active onClick = {this.puzzle_answer.bind(this, 'b')}>
+                                <Radio name="puzzle" checked={true}>
+                                  {v.b}
+                                </Radio>    
+                                </ListGroupItem>
+                          ): (
+                                <ListGroupItem onClick = {this.puzzle_answer.bind(this, 'b')}>
+                                <Radio name="puzzle">
+                                  {v.b}
+                                </Radio>    
+                                </ListGroupItem>
+                          )}
+
+
+                          {this.state.cur_answer == 'c' ? (
+                                <ListGroupItem active onClick = {this.puzzle_answer.bind(this, 'c')}>
+                                <Radio name="puzzle" checked={true}>
+                                  {v.c}
+                                </Radio>    
+                                </ListGroupItem>
+                          ): (
+                                <ListGroupItem onClick = {this.puzzle_answer.bind(this, 'c')}>
+                                <Radio name="puzzle">
+                                  {v.c}
+                                </Radio>    
+                                </ListGroupItem>
+                          )}
+
+                          {this.state.cur_answer == 'd' ? (
+                                <ListGroupItem active onClick = {this.puzzle_answer.bind(this, 'd')}>
+                                <Radio name="puzzle" checked={true}>
+                                  {v.d}
+                                </Radio>    
+                                </ListGroupItem>
+                          ): (
+                                <ListGroupItem id="answer_d" onClick = {this.puzzle_answer.bind(this, 'd')}>
+                                <Radio name="puzzle">
+                                  {v.d}
+                                </Radio>    
+                                </ListGroupItem>
+                          )}                         
+
+                            </ListGroup>
+
+                        </FormGroup>
+                        </form>
+            </Panel>
+
+            )
+      }
+
         return (
             <div>
-            <Panel>
-            <Carousel controls={false} activeIndex={this.state.index} >
-                  {ary}
-            </Carousel>
-            </Panel>
+                {content}
 
                 { this.state.puzzle.length > 0 ? (
                     <div>

@@ -39,11 +39,13 @@ export default class extends Component {
 
     ranking_item(idx, head_img, score_100, test_time, username, money, last) {
         return <div key={idx}>
+
                             <span className="ranking_number">{idx+1}</span>
                             
-                            <span className="ranking_name">{username} </span>
-                             {head_img == null ? null :                            
+                            {head_img == null ? null :                            
                             <Image src={head_img} className='ranking_img'/> }
+                            <span className="ranking_name">{username} </span>
+                             
                             <span>{`${last?'已获得':'将获得'}${(money/100).toFixed(2)}元`}</span>
 
                             <span className="ranking_score_time">
@@ -55,17 +57,21 @@ export default class extends Component {
                     </div>
     }
 
-    want_money() {        
-        var t = this.state.pre_month.filter((v) => v.users_id == store.user.openid) ;
-        if (t.length == 0) {
-            alert('亲，你没有出现在名单中哦，没关系，我们努力超越') ;
-        }else {
-            this.setState({show_diag : true})
-        }
+    want_money() {
+        query('/api/whoami', {}).then(function(ret) {
+                console.log('my openid : ' + ret.user) ;
+                let openid = ret.user ? ret.user.openid : '' ;
+                var t = this.state.pre_month.filter((v) => v.users_id == openid) ;
+                if (t.length == 0) {
+                    alert('亲，你没有出现在名单中哦，没关系，我们努力超越') ;
+                }else {
+                    this.setState({show_diag : true})
+                }
+        }.bind(this))       
     }
 
     register() {
-        let r = this.state.pre_month.find((v) => v.openid == store.user.openid) ;
+        let r = this.state.pre_month.find((v) => v.users_id == store.user.openid) ;
         console.log(r) ;
         if (r) {
             query('/api/prize_mark', {id : r.prize_id, mark : this.contact.value.trim()})

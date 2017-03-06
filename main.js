@@ -571,6 +571,10 @@ app.post('/api/login_by_cheat', function(req, resp) {
       resp.send(JSON.stringify(req.session.wx)) ;
 })
 
+app.post('/api/whoami', function(req, resp) {
+      resp.send(JSON.stringify( {user : req.session.wx} )) ;
+})
+
 app.post('/api/login_by_code', function(req, resp) {
       var url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + APP_ID + 
                       '&secret=' + APP_SECRET + '&code=' + req.body.code + '&grant_type=authorization_code' ;
