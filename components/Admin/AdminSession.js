@@ -63,31 +63,44 @@ export default class extends Component {
                     <Panel header="修改密码">
                     <Form horizontal>
                     <FormGroup>
-                      <Col componentClass={ControlLabel} sm={4}> 原密码 </Col>
+                      <Col componentClass={ControlLabel} sm={2}> 原密码 </Col>
                       <Col sm={6}>
                             <FormControl type="password" defaultValue={''} inputRef={ref => this.old_password = ref}  />                              
                       </Col>
                     </FormGroup>
 
                     <FormGroup>
-                      <Col componentClass={ControlLabel} sm={4}>新密码</Col>
+                      <Col componentClass={ControlLabel} sm={2}>新密码</Col>
                       <Col sm={6}> 
                             <FormControl type="password" defaultValue={''} inputRef={ref => this.new_password = ref} />
                       </Col>
                     </FormGroup>
 
                     <FormGroup>
-                      <Col componentClass={ControlLabel} sm={4}>再次输入新密码</Col>
+                      <Col componentClass={ControlLabel} sm={2}>再次输入新密码</Col>
                       <Col sm={6}> 
                             <FormControl  type="password" defaultValue={''} inputRef={ref => this.confirm_password = ref} />
                       </Col>
                     </FormGroup>
-                     <Button onClick={this.modify_password.bind(this)}> 修改 </Button>   
+
+                    <FormGroup>
+                     <Col componentClass={ControlLabel} sm={2}></Col>
+                      <Col sm={6}> 
+                             <Button onClick={this.modify_password.bind(this)}> 修改 </Button>   
+                      </Col>
+                    </FormGroup>
+
+                    
                     </Form>
                     </Panel>
 
                     <Panel header="会话管理">
-                         <Button onClick={this.quit.bind(this)}> 退出登陆 </Button>
+                          <FormGroup>
+                          <Col componentClass={ControlLabel} sm={2}></Col>
+                          <Col sm={6}> 
+                                 <Button onClick={this.quit.bind(this)}> 退出登陆 </Button>
+                          </Col>           
+                          </FormGroup>               
                     </Panel>
                     </div>
                 )
