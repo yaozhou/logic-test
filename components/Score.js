@@ -1,6 +1,5 @@
 import React, { Component }  from 'react' ;
 import Button from 'react-bootstrap/lib/Button'
-import { connect } from 'react-redux'
 import { query } from './state'
 import Panel from 'react-bootstrap/lib/Panel'
 
@@ -38,15 +37,24 @@ export default class Score extends Component {
 
     render() {
         let content = null ;
+        let short_comment = null ;
+        let comments = null ;
         if (this.state.score_100 != null) 
-            var short_comment = `${this.state.name}的分数是${this.state.score_100},用时${this.state.test_time}秒。${this.state.short_comment}`
+            short_comment = `${this.state.name}的分数是${this.state.score_100},用时${this.state.test_time}秒。${this.state.short_comment}`
+
+        if (this.state.comment != null)
+            comments = this.state.comment.split('\n').map(function(v) {
+                return (
+                    <h5>{v}</h5>
+                )
+            })
 
             content = (
                         <div>
                         <Panel header="结果评分">
                         <h4>{ short_comment}</h4>
                         <hr />
-                        <h5>{ this.state.comment}</h5>
+                        <h5>{ comments}</h5>
                         </Panel>
                         <Button bsStyle="success" bsSize="large" className="score_button" onClick={() => History.push('/cover')}>开始测试</Button>
                         <Button bsStyle="info" bsSize="large" className="score_button" onClick={() => History.push("/ranking")}>排行榜</Button>

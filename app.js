@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, useRouterHistory, hashHistory, browserHistory } from 'react-router';
 import { createHashHistory } from 'history';
-import { createStore } from 'redux'
-import { Provider } from 'react-redux'
+
 
 const History = useRouterHistory(createHashHistory)();
 

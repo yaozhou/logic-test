@@ -132,8 +132,8 @@ var prize = Bookshelf.Model.extend({
   tableName : "prize"
 })
 
-var MONTH_PRIZE_RATIO = [0.3, 0.1, 0.05, 0.03, 0.02, 0.01] ;
-var YEAR_PRIZE_RATIO = [0.3, 0.1, 0.05, 0.03, 0.02, 0.01] ;
+var MONTH_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
+var YEAR_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
 
 function ranking_prize(db, start, end, ratio) {
     return Promise.all([
@@ -264,7 +264,7 @@ conf.forge({id:1}).fetch().then(function(model) {
         for(var i=0; i<=10; ++i) {
             var ary = model.attributes['comment' + i].split('\n') ;
             g_conf.short_comment[i] = ary[0] ;
-            g_conf.comment[i] = ary[1] ;
+            g_conf.comment[i] = ary.slice(1).join('\n') ;
         }
         //console.log(g_conf) ;
 })
@@ -658,8 +658,8 @@ app.post('/api/msg_list', function(req, res) {
 })
 
 function ranking(db, start, end) {
-
-  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, MAX(test.score_100) as score_100, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  group by test.user_id  order by score desc, test_time asc limit 100' ;
+  // caculate max(score) and min(test_time) as score * 10000 - test_time
+  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, test.score_100 as score_100, MAX(test.score_100 * 10000 - test.test_time) as score_real, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  group by test.user_id  order by score desc, test_time asc limit 100' ;
   console.log(sql) ;
   // var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
   //                   'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +
@@ -674,59 +674,29 @@ app.post('/api/score_list', function(req, res) {
     var d = new Moment() ;
     var arg = {} ;
 
-    var week_start = new Moment().startOf('week').format('YYYY-MM-DD') ;
-    var week_end = new Moment().startOf('week').add(7, 'days').format('YYYY-MM-DD') ;
+    var cur_month_start = new Moment().startOf('month').format('YYYY-MM-DD') ;
+    var cur_month_end = new Moment().endOf('month').format('YYYY-MM-DD') ;
 
-    var pre_week_start = new Moment().startOf('week').subtract(7, 'days').format('YYYY-MM-DD') ;
-    var pre_week_end = new Moment().startOf('week').format('YYYY-MM-DD') ;
+    var pre_month_start = new Moment().startOf('month').subtract(1, 'days').startOf('month').format('YYYY-MM-DD') ;
+    var pre_month_end = new Moment().startOf('month').subtract(1, 'days').format('YYYY-MM-DD') ;
+
 
     var year_start = new Moment().startOf('year').format('YYYY-MM-DD') ;
     var year_end = new Moment().startOf('year').add(1, 'years').format('YYYY-MM-DD') ;
 
     Promise.all([
-                            ranking(db, week_start, week_end),
-                            ranking(db, pre_week_start, pre_week_end),
+                            ranking(db, cur_month_start, cur_month_end),
+                            ranking(db, pre_month_start, pre_month_end),
                             ranking(db, year_start, year_end),
                         ]).then(function(ret) {
                               res.send({
-                                    week : ret[0],
-                                    pre_week : ret[1],
+                                    cur_month : ret[0],
+                                    pre_month : ret[1],
                                     year : ret[2],
                               }) ;
                         }) ;
      
-     /*if (req.body.type == "today") {
-        arg = {
-            start : new Moment().format('YYYY-MM-DD'),
-            end : new Moment().add(1, 'days').format('YYYY-MM-DD'),
-        }
-     }
-     else if (req.body.type == "month") {
-        arg = {
-            start : new Moment().startOf('month').format('YYYY-MM-DD'),
-            end : new Moment().add(1, 'months').format('YYYY-MM-DD'),
-          }
-     }else if (req.body.type == 'month_pre') {
-        arg = {
-            start : new Moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD'),
-            end : new Moment().startOf('month').format('YYYY-MM-DD'),
-        }
-     }else {
-      arg = {
-        start : new Moment().subtract(10, 'years').startOf('month').format('YYYY-MM-DD'),
-        end : new Moment().add(10, 'years').startOf('month').format('YYYY-MM-DD'),
-      }
-     }
-
-
-
-     var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
-                    'and date("start_time") >= "' + arg.start + '" and date("start_time") < "' + arg.end + '" ' +
-                   " order by score desc, test_time asc limit 100" ;
-     console.log(sql) ;
-     db.all(sql, function(err, rows) {
-          res.send(JSON.stringify(rows)) ;
-     })*/
+    
 })
 
 app.post('/api/build_order', function(req, resp) {
@@ -904,7 +874,7 @@ app.post('/api/admin/conf_set', function(req, res) {
       for(var i=0; i<=10; ++i) {
         var ary = g_conf['comment' + i].split('\n') ;
             g_conf.short_comment[i] = ary[0] ;
-            g_conf.comment[i] = ary[1] ;
+            g_conf.comment[i] = ary.slice(1).join('\n') ;
       }
       //console.log(g_conf) ;      
     })

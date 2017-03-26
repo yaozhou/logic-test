@@ -100,10 +100,10 @@ export default class extends Component {
             <div>
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
 
-                            <Tab eventKey={1} title="本月累计奖金">
+                            <Tab eventKey={1} title="本月动态奖金">
                                     {month_ary}
                             </Tab>                                    
-                            <Tab eventKey={2} title="年度累计奖金">
+                            <Tab eventKey={2} title="年度动态奖金">
                                     {year_ary}
                             </Tab>
                             { !this.props.hide_last_month ? (

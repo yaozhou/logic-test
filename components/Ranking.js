@@ -10,8 +10,8 @@ export default class Ranking extends Component {
         super(props) ;
 
         this.state = {
-            pre_week : [],
-            week : [],
+            pre_month : [],
+            cur_month : [],
             year : []
         }
     }
@@ -21,8 +21,8 @@ export default class Ranking extends Component {
 
         query('/api/score_list', {}).then(function(ret) {
             this.setState({
-                pre_week : ret.pre_week,
-                week : ret.week,
+                pre_month : ret.pre_month,
+                cur_month : ret.cur_month,
                 year : ret.year,
             })
         }.bind(this))
@@ -46,11 +46,11 @@ export default class Ranking extends Component {
 
     render () {        
 
-        let pre_week_ary = this.state.pre_week.map(function(v, idx) {
+        let pre_month_ary = this.state.pre_month.map(function(v, idx) {
             return this.ranking_item(idx, v.head_img, v.score_100, v.test_time, v.username) ;
         }.bind(this)) ;
 
-        let week_ary = this.state.week.map(function(v, idx) {
+        let cur_month_ary = this.state.cur_month.map(function(v, idx) {
             return this.ranking_item(idx, v.head_img, v.score_100, v.test_time, v.username) ;
         }.bind(this)) ;
         
@@ -60,14 +60,14 @@ export default class Ranking extends Component {
 
         return (
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
-                            <Tab eventKey={1} title="本周排行榜">
+                            <Tab eventKey={1} title="本月排行榜">
                                     <Panel>
-                                    {week_ary}
+                                    {cur_month_ary}
                                     </Panel>
                             </Tab>
-                            <Tab eventKey={2} title="上周排行榜">
+                            <Tab eventKey={2} title="上月排行榜">
                                     <Panel>
-                                    {pre_week_ary}
+                                    {pre_month_ary}
                                     </Panel>
                             </Tab>                                    
                             <Tab eventKey={3} title="年度排行榜">
