@@ -78,6 +78,7 @@ export default class extends Component {
             query('/api/admin/puzzle_set', q)
                 .then(function(ret) {
                     if (this.state.in_edit >= 0) { // 修改题目
+
                         this.state.puzzles[this.state.in_edit] = q ;
                     }else {
                         this.state.puzzles.push(ret.detail)
@@ -186,7 +187,7 @@ export default class extends Component {
                                             />
                                   </InputGroup>
                                 </FormGroup>
-                                <Checkbox inline defaultChecked={puzzle_in_edit ? puzzle_in_edit.enable == 1 : false}
+                                <Checkbox inline defaultChecked={puzzle_in_edit ? puzzle_in_edit.enable != "0" : false}
                                               onChange={() => this.setState({enable : !this.state.enable})}>
                                   是否启用
                                 </Checkbox>                       
