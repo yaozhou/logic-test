@@ -15,12 +15,14 @@ import Wx from './components/Wx'
 import Prize from './components/Prize'
 import AdminLogin from './components/Admin/AdminLogin'
 import Admin from './components/Admin'
+import Audio from './components/Audio'
 
 let element = document.getElementById('reactEntry');
 ReactDOM.render(( 
         <Router history={hashHistory}>
 
             <Route path="/" component={Wx} />
+            <Route path="/audio" component={Audio} />
             <Route path="/app" component={Container} >
                 <IndexRoute components={Cover} />
                 <Route path="/puzzle" component={Puzzle} />
@@ -30,6 +32,7 @@ ReactDOM.render((
                 <Route path="/prize" component={Prize} />
                 <Route path="/login" component={AdminLogin} />
                 <Route path="/admin" component={Admin} />
+                
             </Route>
         </Router>
   ), element) ;
