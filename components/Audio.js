@@ -65,9 +65,14 @@ export default class extends Component {
             return (
                 <div>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
+                    
                     <h3>耳朵去旅行</h3>
-                    </div>
+                    </div>                 
+                    
                     <hr />
+                    
+                    <p>提示: 首次打开时，请等待音效文件缓冲结束(结束后右侧会出现音量控制图标)</p>
+                    
                     {list}   
                      
                 </div>
