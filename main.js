@@ -659,7 +659,7 @@ app.post('/api/msg_list', function(req, res) {
 
 function ranking(db, start, end) {
   // caculate max(score) and min(test_time) as score * 10000 - test_time
-  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, test.score_100 as score_100, MAX(test.score_100 * 10000 - test.test_time) as score_real, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '"  group by test.user_id  order by score desc, test_time asc limit 100' ;
+  var sql = 'select  test.id as id, test.start_time as start_time, test.score as score, test.user_id as user_id, test.score_100 as score_100, MAX(test.score_100 * 10000 - test.test_time) as score_real, test.test_time as test_time, users.id as openid, users.username as username, users.password as password, users.point as point, users.head_img as head_img  from test left join users on test.user_id = users.id where test.score != -1 and score_100 >= 70 and test.test_time != -1 and date("start_time") >= "' + start + '" and date("start_time") < "' + end + ' "  group by test.user_id  order by score desc, test_time asc limit 1000' ;
   console.log(sql) ;
   // var sql = 'select * from test left join  users on test.user_id = users.id where test.score != -1 and test.test_time != -1 ' +
   //                   'and date("start_time") >= "' + start + '" and date("start_time") < "' + end + '" ' +

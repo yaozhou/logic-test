@@ -23,6 +23,7 @@ var source = [
   'yinxiao/web/下雨.m4a',
   'yinxiao/web/西藏念经.wav',
   'yinxiao/web/风声.WAV',
+  'yinxiao/web/咖啡厅.mp3',
   'yinxiao/web/Midnight-Blues.mp3',
   'yinxiao/web/bird_chirping.mp3',
   'yinxiao/web/和尚念经的声音.wav',
@@ -41,6 +42,7 @@ var source = [
   'yinxiao/web/夜的钢琴曲9.mp3',
   'yinxiao/web/夜的钢琴曲10.mp3',
 
+
 ]
 
 export default class extends Component {
@@ -57,7 +59,7 @@ export default class extends Component {
           let n = v.split('/')[v.split('/').length-1] ;
           return (
               <Panel key={idx} header={n.split('.')[0]}>
-              <audio src={v} controls loop></audio>  
+              <audio src={v} controls loop preload="auto"></audio>  
               </Panel>
             )
         })
