@@ -9,6 +9,10 @@ import FormControl from 'react-bootstrap/lib/FormControl'
 import Alert from 'react-bootstrap/lib/Alert'
 import { query, store } from './state'
 
+import { useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
+const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
+
 export default class extends Component {
     constructor(props) {
         super(props) ;
@@ -109,7 +113,7 @@ export default class extends Component {
                             { !this.props.hide_last_month ? (
                             <Tab eventKey={3} title="上月奖金榜单">
                                     {pre_month_ary}
-                                    <Button bsStyle="primary" bsSize="large" className="score_button" onClick={this.want_money.bind(this)}>我要去领奖 </Button>
+                                    <Button bsStyle="primary" bsSize="small" className="score_button" onClick={this.want_money.bind(this)}>我要去领奖 </Button>
                             </Tab> ) : 
                                 null }
                     </Tabs>
@@ -139,7 +143,7 @@ export default class extends Component {
                           </Modal.Footer>
                         </Modal>
                         </div>                         
-
+            <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/')}>我也来测下</Button>
 
             </div>
         )

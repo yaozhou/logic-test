@@ -82,7 +82,7 @@ export default class Ranking extends Component {
                                     </Panel>
                             </Tab>
                     </Tabs>
-                    <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/cover')}>我也来测下</Button>
+                    <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/')}>我也来测下</Button>
             </div>
         )
     }
