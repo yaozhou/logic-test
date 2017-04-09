@@ -3,7 +3,12 @@ import Tabs from 'react-bootstrap/lib/Tabs'
 import Tab from 'react-bootstrap/lib/Tab'
 import Image from 'react-bootstrap/lib/Image'
 import Panel from 'react-bootstrap/lib/Panel'
+import Button from 'react-bootstrap/lib/Button'
 import { query } from './state'
+
+import { useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
+const History = useRouterHistory(createHashHistory)({queryKey: false}) ;
 
 export default class Ranking extends Component {
     constructor(props) {
@@ -59,23 +64,26 @@ export default class Ranking extends Component {
         }.bind(this)) ;
 
         return (
+                <div>
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
-                            <Tab eventKey={1} title="本月排行榜">
+                            <Tab eventKey={1} title="本月排行榜(70分以上)">
                                     <Panel>
                                     {cur_month_ary}
                                     </Panel>
                             </Tab>
-                            <Tab eventKey={2} title="上月排行榜">
+                            <Tab eventKey={2} title="上月排行榜(70分以上)">
                                     <Panel>
                                     {pre_month_ary}
                                     </Panel>
                             </Tab>                                    
-                            <Tab eventKey={3} title="年度排行榜">
+                            <Tab eventKey={3} title="年度排行榜(70分以上)">
                                     <Panel>
                                     {year_ary}
                                     </Panel>
                             </Tab>
                     </Tabs>
+                    <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/cover')}>我也来测下</Button>
+            </div>
         )
     }
 }
