@@ -24,6 +24,7 @@ var source = [
   'yinxiao/web/西藏念经.wav',
   'yinxiao/web/风声.WAV',
   'yinxiao/web/咖啡厅.mp3',
+  'yinxiao/web/鸟叫.mp3',
   'yinxiao/web/Midnight-Blues.mp3',
   'yinxiao/web/bird_chirping.mp3',
   'yinxiao/web/和尚念经的声音.wav',
@@ -41,6 +42,7 @@ var source = [
   'yinxiao/web/夜的钢琴曲8.mp3',
   'yinxiao/web/夜的钢琴曲9.mp3',
   'yinxiao/web/夜的钢琴曲10.mp3',
+
 
 
 ]
