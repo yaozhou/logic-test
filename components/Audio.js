@@ -14,6 +14,13 @@ import Col from 'react-bootstrap/lib/Col'
 import Well from 'react-bootstrap/lib/Well'
 import { query, store } from './state'
 
+// 合适的降噪效果好的耳机，一些舒缓的背景环境音隔绝办公室杂音。
+//我一直听的有
+//soundrown  里面有海浪，下雨，咖啡厅之类的场景音效，立体音，品质非常好。
+//Rainy Mood  这个里面有高品质立体音下雨音效。
+//耳朵去旅行 里面音效非常多，还可自由组合播放。
+//我一般撸代码时听上面的那些和缓的环境音，debug时听摇滚..
+
 var source = [
   'yinxiao/web/山居吟-龚一.mp3',
   'yinxiao/web/柔和海浪.mp3',
@@ -42,7 +49,7 @@ var source = [
   'yinxiao/web/夜的钢琴曲8.mp3',
   'yinxiao/web/夜的钢琴曲9.mp3',
   'yinxiao/web/夜的钢琴曲10.mp3',
-
+  'yinxiao/web/午夜的萨克斯.mp3',
 
 
 ]
@@ -54,6 +61,14 @@ export default class extends Component {
 
     componentDidMount() {
       document.title = '耳朵去旅行'
+      this.interval = setInterval(function() {
+        query('/api/count', {type : 'audio'}) ;  
+      }, 1000*60*5) ;      
+    }
+
+    componentWillUnmount() {
+      if (this.interval != null) 
+        clearInterval(this.interval) ;
     }
 
     render () { 
@@ -61,7 +76,7 @@ export default class extends Component {
           let n = v.split('/')[v.split('/').length-1] ;
           return (
               <Panel key={idx} header={n.split('.')[0]}>
-              <audio src={v} controls loop preload="auto"></audio>  
+              <audio src={v} controls loop preload="none"></audio>  
               </Panel>
             )
         })
@@ -75,7 +90,8 @@ export default class extends Component {
                     
                     <hr />
                     
-                    <p>提示: 首次打开时，请等待音效文件缓冲结束(结束后右侧会出现音量控制图标)</p>
+                    <p>提示: 可随意组合播放各种音效哦,带上耳机效果更好.</p>
+                    <a href="http://www.logictest.net:4567/">社区</a>
                     
                     {list}   
                      

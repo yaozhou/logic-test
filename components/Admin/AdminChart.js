@@ -50,6 +50,7 @@ export default class extends Component {
                     stat.test_num = visit.filter((v) => (v.time.split(' ')[0] ==  stat.day && v.view_type == 'test')).length ;
                     stat.result_num = visit.filter((v) => (v.time.split(' ')[0] ==  stat.day && v.view_type == 'result')).length ;
                     stat.ranking_num = visit.filter((v) => (v.time.split(' ')[0] ==  stat.day && v.view_type == "ranking")).length ;
+                    stat.audio_num = visit.filter((v) => (v.time.split(' ')[0] ==  stat.day && v.view_type == "audio")).length ;
 
                     return stat ;
           }) ;
@@ -104,6 +105,9 @@ export default class extends Component {
                 }, {
                     name: '排行页',
                     data : this.state.result.map(v => v.ranking_num),                    
+                }, {
+                    name: '音乐页',
+                    data : this.state.result.map(v => v.audio_num)   
                 }]
             }
 
