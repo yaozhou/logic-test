@@ -723,7 +723,8 @@ app.post('/api/build_order', function(req, resp) {
 })
 
 app.post('/api/count', function(req, res) {
-    var obj = {view_type : req.body.type, ip:req.connection.remoteAddress, cookie: "cookie", user_name:"name"} ;
+    var ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'] : req.connection.remoteAddress ;
+    var obj = {view_type : req.body.type, ip:ip, cookie: "cookie", user_name:"name"} ;
     statistics.forge(obj).save().then(function(model) {
         //console.log(model) ;
         res.send(JSON.stringify({code : 0, type : req.body.type}) ) ;

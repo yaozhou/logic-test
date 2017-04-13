@@ -60,7 +60,7 @@ export default class extends Component {
     }
 
     componentDidMount() {
-      document.title = '耳朵去旅行'
+      document.title = '安静地写代码'
       this.interval = setInterval(function() {
         query('/api/count', {type : 'audio'}) ;  
       }, 1000*60*5) ;      
@@ -85,15 +85,15 @@ export default class extends Component {
                 <div>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
                     
-                    <h3>耳朵去旅行</h3>
+                    <h3>安静地写代码</h3>
                     </div>                 
                     
                     <hr />
                     
                     <p>提示: 可随意组合播放各种音效哦,带上耳机效果更好.</p>
-                    <a href="http://www.logictest.net:4567/">社区</a>
+                    <a href="http://bbs.nianna.space/">社区</a>
                     
-                    {list}   
+                    {list}
                      
                 </div>
                                 

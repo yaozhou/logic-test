@@ -5,6 +5,7 @@ import Image from 'react-bootstrap/lib/Image'
 import Panel from 'react-bootstrap/lib/Panel'
 import Button from 'react-bootstrap/lib/Button'
 import { query } from './state'
+var wx = require ('./jweixin-1.2.0.js')
 
 import { useRouterHistory } from 'react-router';
 import { createHashHistory } from 'history';
@@ -49,6 +50,21 @@ export default class Ranking extends Component {
                     </div>
     }
 
+    onShareTimeline() {
+        alert('onShareTimeline');
+        wx.onMenuShareTimeline({
+            title: 'test title', // 分享标题
+            link: 'http://www.logictest.net', // 分享链接
+            imgUrl: 'http://www.logictest.net/img/lt.jpeg', // 分享图标
+            success: function () { 
+                alert('success') ;
+            },
+            cancel: function () { 
+                alert('cancel') ;
+            }
+        });
+    }
+
     render () {        
 
         let pre_month_ary = this.state.pre_month.map(function(v, idx) {
@@ -82,7 +98,7 @@ export default class Ranking extends Component {
                                     </Panel>
                             </Tab>
                     </Tabs>
-                    <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/')}>我也来测下</Button>
+                    <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/')}>我也来测下</Button>     
             </div>
         )
     }

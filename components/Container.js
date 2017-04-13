@@ -25,6 +25,7 @@ export default class Container extends Component {
             signature : user.config.signature,
             jsApiList :  [
                 'chooseWXPay',
+            //    'onMenuShareTimeline',
             ],
         }
         wx.config(config) ;
