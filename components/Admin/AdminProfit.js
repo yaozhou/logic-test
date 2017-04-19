@@ -34,12 +34,12 @@ export default class extends Component {
         var cur_month_end = new Moment().endOf('month').format('YYYY-MM-DD') ;
 
         query('/api/profit_list', {start : pre_month_start, end : pre_month_end}).then(function(ret) {
-            this.setState({pre_month : ret}) ;
+            this.setState({pre_month : ret.reverse()}) ;
             console.log(ret) ;
         }.bind(this))
 
         query('/api/profit_list', {start : cur_month_start, end : cur_month_end}).then(function(ret) {
-            this.setState({cur_month : ret}) ;
+            this.setState({cur_month : ret.reverse()}) ;
             console.log(ret) ;
         }.bind(this))
     }    
@@ -59,7 +59,7 @@ export default class extends Component {
       }) ;
       let total = profit_list.reduce((acc, val) => acc+val.total_fee, 0) ;
 
-      ary.push( (
+      ary.splice(0,0, (
               <tr key={profit_list.length}>
               <td></td>
               <td></td>
@@ -68,7 +68,7 @@ export default class extends Component {
               <td></td>
               </tr>
         )
-      )
+      ) ;
 
       return (
           <Table striped bordered condensed hover>
