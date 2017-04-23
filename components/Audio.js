@@ -85,15 +85,13 @@ export default class extends Component {
                 <div>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
                     
-                    <h3>安静地写代码</h3>
-                    </div>                 
+                    <h3>耳朵去旅行</h3>
+                    </div>
                     
-                    <hr />
+                    <hr />                    
                     
-                    <p>提示: 可随意组合播放各种音效哦,带上耳机效果更好.</p>
-                    <a href="http://bbs.nianna.space/">社区</a>
+                    <a href="http://www.manmanqiusuo.com/">网站已永久迁移,点击跳转</a>                    
                     
-                    {list}
                      
                 </div>
                                 

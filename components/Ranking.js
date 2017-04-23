@@ -99,6 +99,9 @@ export default class Ranking extends Component {
                             </Tab>
                     </Tabs>
                     <Button bsStyle="success" bsSize="small" className="score_button" onClick={() => History.push('/')}>我也来测下</Button>     
+                    
+                    <a href="http://www.manmanqiusuo.com" style={{float:'right'}}>耳朵去旅行</a>
+                    
             </div>
         )
     }
