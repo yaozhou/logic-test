@@ -67,7 +67,8 @@ export default class extends Component {
                 let openid = ret.user ? ret.user.openid : '' ;
                 var t = this.state.pre_month.filter((v) => v.users_id == openid) ;
                 if (t.length == 0) {
-                    alert('亲，你没有出现在名单中哦，没关系，我们努力超越') ;
+                    //alert('openid=' + ret.user.openid + ',亲，你是 你没有出现在名单中哦，没关系，我们努力超越') ;
+                    alert('亲，你是 你没有出现在名单中哦，没关系，我们努力超越') ;
                 }else {
                     this.setState({show_diag : true})
                 }

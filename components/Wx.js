@@ -16,7 +16,7 @@ export default class Wx extends Component {
 
     componentDidMount() {
         if (this.is_weixn()) {
-            window.location.href = auth_url ;
+            window.location.href = auth_url.replace('STATE', this.props.state) ;
         }else {
              alert("请在微信浏览器中打开") ;
         }

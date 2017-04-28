@@ -401,7 +401,7 @@ app.get('/*.html', function(req, res, next) {
 app.get('/mp', function(req, resp, next) {  
 
     console.log("redirect") ;
-    resp.redirect('/#/cover?code='  + req.query.code) ;
+    resp.redirect('/#/' + req.query.state + '?code='  + req.query.code) ;
 })
 
 // { xml: 

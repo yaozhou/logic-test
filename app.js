@@ -18,18 +18,20 @@ import Admin from './components/Admin'
 import Audio from './components/Audio'
 
 let element = document.getElementById('reactEntry');
+//let cover_wx = (<Wx state='cover'>) ;
 ReactDOM.render(( 
         <Router history={hashHistory}>
 
-            <Route path="/" component={Wx} />
+            <Route path="/" component={() => (<Wx state='cover' />)} />
             <Route path="/audio" component={Audio} />
-            <Route path="/app" component={Container} >
+            <Route path="/prize" component={() => (<Wx state='prize_noauth' />)} />
+            <Route path="/app" component={Container} >  
                 <IndexRoute components={Cover} />
                 <Route path="/puzzle" component={Puzzle} />
                 <Route path="/score" component={Score} />
                 <Route path="/ranking" component={Ranking} />
                 <Route path="/cover" component={Cover} />
-                <Route path="/prize" component={Prize} />
+                <Route path="/prize_noauth" component={Prize} />
                 <Route path="/login" component={AdminLogin} />
                 <Route path="/admin" component={Admin} />
                 
