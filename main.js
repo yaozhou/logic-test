@@ -133,7 +133,7 @@ var prize = Bookshelf.Model.extend({
 })
 
 var MONTH_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
-var YEAR_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
+var YEAR_PRIZE_RATIO = [0.05*0.5, 0.05*0.2, 0.05*0.15, 0.05*0.10, 0.05*0.05] ;
 
 function ranking_prize(db, start, end, ratio) {
     return Promise.all([
