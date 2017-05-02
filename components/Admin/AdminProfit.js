@@ -33,6 +33,8 @@ export default class extends Component {
         var cur_month_start = new Moment().startOf('month').format('YYYY-MM-DD') ;
         var cur_month_end = new Moment().endOf('month').format('YYYY-MM-DD') ;
 
+        
+
         query('/api/profit_list', {start : pre_month_start, end : pre_month_end}).then(function(ret) {
             this.setState({pre_month : ret.reverse()}) ;
             console.log(ret) ;
@@ -42,7 +44,54 @@ export default class extends Component {
             this.setState({cur_month : ret.reverse()}) ;
             console.log(ret) ;
         }.bind(this))
+
+
     }    
+
+    download_all() {
+      
+
+    }
+
+    download_excel() {
+
+      function download(fileName, blob){
+          var aLink = document.createElement('a');
+          var evt = document.createEvent("MouseEvents");
+          evt.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          aLink.download = fileName;
+          aLink.href = URL.createObjectURL(blob);
+          aLink.dispatchEvent(evt);
+      }
+       
+      /* 文本转Blob对象 */
+      function stringToBlob(text) {
+          var u8arr = new Uint8Array(text.length);
+          for (var i = 0, len = text.length; i < len; ++i) {
+              u8arr[i] = text.charCodeAt(i);
+          }
+          var blob = new Blob([u8arr]);
+          return blob;
+      }
+
+      var all_start = new Moment('2017-01-01') ;
+      var all_end = new Moment() ;
+
+      query('/api/profit_list', {start: all_start, end: all_end}).then(function(ret) {
+        let lines = ret.map(function(v) {
+          return Object.keys(v).map((key) => v[key]).join(',\t') ;
+        })
+        
+        let str = (ret.length > 0 ? Object.keys(ret[0]).map((key) => key).join(',\t') + '\n' : '')  ; 
+        str = str + lines.join('\n') ;
+
+        /* 使用demo */
+        var blob = stringToBlob(str);
+        download('统计.csv', blob);
+      }.bind(this))
+       
+      
+    }
 
 
     profit(profit_list) {
@@ -99,7 +148,11 @@ export default class extends Component {
                             </Tab>
                             <Tab eventKey={2} title="上月盈利">
                                     {pre_month_profit}
-                            </Tab>                                    
+                            </Tab>        
+                            <Tab eventKey={3} title="导出数据">
+                                <Button bsStyle="success" onClick={() => this.download_excel()}>导出成Excel</Button>
+
+                            </Tab>                            
                             
                     </Tabs>                 
                 )
