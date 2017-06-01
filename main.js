@@ -167,7 +167,8 @@ function caculate_pre_month_prize() {
                   test_id : v.id,
                   ranking : idx,
                   money : v.money,
-                  mark : "",
+                  user_mark : "",
+                  admin_mark : "",
                 } ;       
                 new prize().save(p) ;
           })
