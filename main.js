@@ -133,17 +133,19 @@ var prize = Bookshelf.Model.extend({
 })
 
 var MONTH_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
-var YEAR_PRIZE_RATIO = [0.5*0.5, 0.5*0.2, 0.5*0.15, 0.5*0.10, 0.5*0.05] ;
+var YEAR_PRIZE_RATIO = [0.05*0.5, 0.05*0.2, 0.05*0.15, 0.05*0.10, 0.05*0.05] ;
 
 function ranking_prize(db, start, end, ratio) {
-    return Promise.all([
+    	console.log('ranking_prize') ;
+	return Promise.all([
           profit(db, start, end),
           ranking(db, start, end),
       ])
     .then(function(ret) {
         var money = ret[0][0].money ;
         var ranking = ret[1] ;
-    //    console.log(ranking) ;
+	console.log('ranking_prize then') ;
+        console.log(ranking) ;
 
         ranking = ranking.slice(0, ratio.length) ;
         ranking.forEach(function(v, idx) {
@@ -151,15 +153,19 @@ function ranking_prize(db, start, end, ratio) {
                 ranking[idx].money = Math.floor(money * ratio[idx]) ;
         })
         return ranking ;
-    })
+    }).catch(function(error) {
+	console.error(error) ;
+
+	}) 
 }
 
 
 function caculate_pre_month_prize() {
     var start = new Moment().startOf('month').subtract(1, 'days').startOf('month').format('YYYY-MM-DD') ;
     var end = new Moment().startOf('month').subtract(1, 'days').format('YYYY-MM-DD') ;
-
+console.log('calculate pre month') ;
     ranking_prize(db, start, end, MONTH_PRIZE_RATIO).then(function(ranking) {
+		console.log('caculate pre month then') ;
               ranking.forEach(function(v, idx) {
                 var p =  {
                   date : start.substring(0,7),
@@ -167,7 +173,8 @@ function caculate_pre_month_prize() {
                   test_id : v.id,
                   ranking : idx,
                   money : v.money,
-                  mark : "",
+                  user_mark : "",
+		admin_mark : "",
                 } ;       
                 new prize().save(p) ;
           })
@@ -455,7 +462,8 @@ app.post('/order_notify', function(req, resp) {
 function profit(db, start, end) {
      var sql = 'select SUM(total_fee) as money from money where date("create_time") >= "' + 
                         start + '" and date(create_time) <=  "' + end  + '"' ;
-    return sql_promise(db, sql) ;
+    console.log('profit sql ' + sql) ;
+	return sql_promise(db, sql) ;
 }
 
 
