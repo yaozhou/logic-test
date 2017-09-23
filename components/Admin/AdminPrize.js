@@ -56,7 +56,7 @@ export default class extends Component {
                                   <td>{v.test_test_time}</td>
                                   <td>{v.test_start_time}</td>
                                   <td>{v.test_score_100}</td>
-                                  <td>{v.prize_money}</td>
+                                  <td>{(v.prize_money/100).toFixed(2)}</td>
                                   <td>{v.prize_user_mark} </td>
                                   <td>{v.prize_admin_mark} 
                                   <Button onClick={() => {

@@ -30,8 +30,8 @@ CREATE TABLE prize (
     "test_id" TEXT NOT NULL,
     "ranking" INTEGER NOT NULL,
     "money" INTEGER NOT NULL,
-    "user_mark" TEXT NOT NULL,
-    "admin_mark" TEXT NOT NULL
+    "user_mark" TEXT,
+    "admin_mark" TEXT
 ) ;
 
 CREATE TABLE money (
