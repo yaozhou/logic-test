@@ -193,7 +193,7 @@ function caculate_pre_year_prize() {
                 test_id : v.id,
                 ranking : idx,
                 money : v.money,
-                mark : "",
+                user_mark : "",
             }    
             new prize().save(p) ;
         })

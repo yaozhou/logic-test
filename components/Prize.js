@@ -23,6 +23,7 @@ export default class extends Component {
             month : [],
             year : [],
             show_diag : false,
+            want_money_month : true
         }
     }
 
@@ -61,22 +62,33 @@ export default class extends Component {
                     </div>
     }
 
-    want_money() {
+    want_last_month_money() {
+        this.want_money(true)
+    }
+
+    want_last_year_money() {
+        this.want_money(false)
+    }
+
+    want_money(is_last_month) {
         query('/api/whoami', {}).then(function(ret) {
                 console.log('my openid : ' + ret.user) ;
                 let openid = ret.user ? ret.user.openid : '' ;
-                var t = this.state.pre_month.filter((v) => v.users_id == openid) ;
+                var prize_list = is_last_month ? this.state.pre_month : this.state.pre_year;
+
+                var t = prize_list.filter((v) => v.users_id == openid) ;
                 if (t.length == 0) {
                     //alert('openid=' + ret.user.openid + ',亲，你是 你没有出现在名单中哦，没关系，我们努力超越') ;
-                    alert('亲，你是 你没有出现在名单中哦，没关系，我们努力超越') ;
+                    alert('亲, 你没有出现在名单中哦，没关系，我们努力超越') ;
                 }else {
-                    this.setState({show_diag : true})
+                    this.setState({show_diag : true, want_money_month : is_last_month})
                 }
         }.bind(this))       
     }
 
     register() {
-        let r = this.state.pre_month.find((v) => v.users_id == store.user.openid) ;
+        let prize_list = this.state.is_last_month ? this.state.pre_month : this.state.pre_year;
+        let r = prize_list.find((v) => v.users_id == store.user.openid) ;
         console.log(r) ;
         if (r) {
             query('/api/prize_mark', {id : r.prize_id, mark : this.contact.value.trim()})
@@ -101,6 +113,10 @@ export default class extends Component {
            return this.ranking_item(idx, v.head_img, v.score_100, v.test_time, v.username, v.money)
         }.bind(this)) ;
 
+         let pre_year_ary = this.state.pre_year.map(function(v, idx) {
+            return this.ranking_item(idx, v.users_head_img, v.test_score_100, v.test_test_time, v.users_username, v.prize_money, true) ;
+        }.bind(this)) ;
+
         return (
             <div>
                       <Tabs defaultActiveKey={1} animation={false} id="noanim-tab-example">
@@ -114,8 +130,15 @@ export default class extends Component {
                             { !this.props.hide_last_month ? (
                             <Tab eventKey={3} title="上月奖金榜单">
                                     {pre_month_ary}
-                                    <Button bsStyle="primary" bsSize="small" className="score_button" onClick={this.want_money.bind(this)}>我要去领奖 </Button>
+                                    <Button bsStyle="primary" bsSize="small" className="score_button" onClick={this.want_last_month_money.bind(this)}>我要去领奖 </Button>
                             </Tab> ) : 
+                                null }
+
+                            { !this.props.hide_last_month ?  (
+                                <Tab eventKey={4} title="去年奖金榜单">
+                                    {pre_year_ary}
+                                    <Button bsStyle="primary" bsSize="small" className="score_button" onClick={this.want_last_year_money.bind(this)}>我要去领奖 </Button>
+                                </Tab> ) : 
                                 null }
                     </Tabs>
                     
